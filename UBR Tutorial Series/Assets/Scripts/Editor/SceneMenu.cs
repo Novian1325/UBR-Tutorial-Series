@@ -1,6 +1,9 @@
 ﻿using UnityEditor;
 using UnityEditor.SceneManagement;
 
+/// <summary>
+/// Adds a Menu to the top of Unity to quickly switch between Scenes. NOTE: DOES NOT SAVE SCENE!
+/// </summary>
 public static class SceneMenu
 {
     //TEMPLATE
@@ -9,5 +12,10 @@ public static class SceneMenu
     //{
     //    EditorSceneManager.OpenScene("Assets/Scenes/EmpiresEdge.unity");
     //}
+
+    private static void LoadWorkshopScene()
+    {
+        EditorSceneManager.OpenScene("Assets/Scenes/Workshop.unity");
+    }
     
 }
