@@ -26,8 +26,8 @@ namespace Bolt.Samples.PlayFab
 		/// <summary>
 		/// Flag to signal PlayFabMultiplayerAgentAPI to show debug info
 		/// </summary>
-		[SerializeField]
-		private bool Debugging = true;
+		//[SerializeField]
+		//private bool Debugging = true;
 
 		private HeadlessServerConfig config;
 
