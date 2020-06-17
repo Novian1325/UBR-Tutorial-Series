@@ -2,7 +2,7 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class PlaneManager : MonoBehaviour
+    public class PlaneManager : RichMonoBehaviour
     {
         [SerializeField] private int airspeed = 100;
         [SerializeField] private GameObject cargo_Supplies;

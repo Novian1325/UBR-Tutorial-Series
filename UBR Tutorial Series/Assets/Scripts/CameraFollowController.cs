@@ -2,7 +2,7 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class CameraFollowController : MonoBehaviour
+    public class CameraFollowController : RichMonoBehaviour
     {
         public Transform objectToFollow;
         public Vector3 offset;

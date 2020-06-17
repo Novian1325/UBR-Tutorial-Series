@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class BRS_TacticalMarker : MonoBehaviour
+    public class BRS_TacticalMarker : RichMonoBehaviour
     {
         #region Static Readonly Variables
 
@@ -58,25 +58,20 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         //TODO
         //hold 't' for 3 seconds to remove marker from map
 
-        void Start()
+        protected override void GatherReferences()
         {
-            if (!TacticalMarkerPrefab) Debug.LogError("ERROR! No Tactical Marker Prefab set!");
+            base.GatherReferences();
             playerCameraXform = GameObject.FindGameObjectWithTag("MainCamera").transform as Transform;//get the player's camera
             minimapCameraXform = GameObject.FindGameObjectWithTag("MiniMap Camera").transform as Transform;
         }
 
-        private void DestroyExistingTacticalMarkerAtDistanceLimit()
+        private void Start()
         {
-            //if distance between player and marker > distance limit
-            if (distanceToMarker > tacticalMarkerPlaceDistanceLimit)
-            {
-                Debug.Log("Distance: " + Vector3.Distance(this.transform.position, tacticalMarkerInstance.transform.position) + ". Destroying TacticalMarker.");
-                if (tacticalMarkerInstance) Destroy(tacticalMarkerInstance);//if it exists, destroy it
-            }
+            if (!TacticalMarkerPrefab) Debug.LogError("ERROR! No Tactical Marker Prefab set!");
         }
-
+        
         // Update is called once per frame
-        void Update()
+        private void Update()
         {
             //Handle Tactical Marker
             if (Input.GetButtonDown(TMBUTTONNAME))
@@ -89,6 +84,16 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 UpdateDistanceToMarker();
 
                 DestroyExistingTacticalMarkerAtDistanceLimit();
+            }
+        }
+
+        private void DestroyExistingTacticalMarkerAtDistanceLimit()
+        {
+            //if distance between player and marker > distance limit
+            if (distanceToMarker > tacticalMarkerPlaceDistanceLimit)
+            {
+                Debug.Log("Distance: " + Vector3.Distance(this.transform.position, tacticalMarkerInstance.transform.position) + ". Destroying TacticalMarker.");
+                if (tacticalMarkerInstance) Destroy(tacticalMarkerInstance);//if it exists, destroy it
             }
         }
 

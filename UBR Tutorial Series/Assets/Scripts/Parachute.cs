@@ -2,11 +2,23 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class Parachute : MonoBehaviour
+    public class Parachute : RichMonoBehaviour
     {
-
         private Animator anim;
         private MeshRenderer meshRenderer;
+
+        // Use this for initialization
+        private void Start()
+        {
+            meshRenderer.enabled = false;
+        }
+
+        protected override void GatherReferences()
+        {
+            base.GatherReferences();
+            anim = this.gameObject.GetComponent<Animator>();
+            meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
+        }
 
         public void DeployParachute()
         {
@@ -14,7 +26,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             anim.SetTrigger("DeployChute");
             //play sound
             //let other players know teammate deployed 'chute  
-
         }
 
         public void DestroyParachute()
@@ -25,20 +36,5 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             Destroy(this.gameObject);
         }
 
-
-        // Use this for initialization
-        void Start()
-        {
-            anim = this.gameObject.GetComponent<Animator>();
-            meshRenderer = this.gameObject.GetComponent<MeshRenderer>();
-            meshRenderer.enabled = false;
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
     }
-
 }

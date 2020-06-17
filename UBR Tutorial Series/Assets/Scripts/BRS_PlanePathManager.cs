@@ -3,8 +3,7 @@ using System.Collections.Generic;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class BRS_PlanePathManager : MonoBehaviour
-
+    public class BRS_PlanePathManager : RichMonoBehaviour
     {
         //visible to Inspector
         [Header("Map Settings")]

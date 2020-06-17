@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class BRS_CompassMarker : MonoBehaviour
+    public class BRS_CompassMarker : RichMonoBehaviour
     {
 
         [Tooltip("Integrated. Optional.")]
@@ -18,13 +18,13 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private Coroutine coroutine_updateDistanceText;//track to enable pausing game
         private static readonly int textUpdatesPerSecond = 2;
 
-        private void Awake()
+        protected override void GatherReferences()
         {
+            base.GatherReferences();
             if (!compassMarkerImage)
             {
                 compassMarkerImage = gameObject.GetComponent<RawImage>() as RawImage;
             }
-
         }
 
         private void Start()

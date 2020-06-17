@@ -2,7 +2,7 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class Color_Rarity : MonoBehaviour
+    public class Color_Rarity : RichMonoBehaviour
     {
         [Header("Colors for Rarity")]
         public static readonly Color common = new Color(0.5f, 0.5f, 0.5f, 1.0f);//gray

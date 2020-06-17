@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    [System.Serializable]//makes visible in Inspector!
-    public struct ShrinkPhase 
+    [Serializable]//makes visible in Inspector!
+    public struct ShrinkPhase
     {
         /// <summary>
         /// The amount of seconds that must pass before the Zone Wall begins shrinking.

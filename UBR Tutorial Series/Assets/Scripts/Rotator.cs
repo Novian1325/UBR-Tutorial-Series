@@ -2,23 +2,14 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class Rotator : MonoBehaviour
+    public class Rotator : RichMonoBehaviour
     {
         [SerializeField] private Vector3 rotateSpeed;
-
-        private Transform xform;//cache for performance
-
-        // Use this for initialization
-        void Start()
-        {
-            xform = this.transform;
-        }
-
+        
         // Update is called once per frame
-        void Update()
+        private void Update()
         {
-            xform.Rotate(rotateSpeed * Time.deltaTime);
-
+            transform.Rotate(rotateSpeed * Time.deltaTime);
         }
     }
 

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class BRS_RandomLootSpawn : MonoBehaviour
+    public class BRS_RandomLootSpawn : RichMonoBehaviour
     {
         [Header("---Spawn Range---")]
 

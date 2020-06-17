@@ -3,7 +3,7 @@
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
     [RequireComponent(typeof(Collider))]
-    public class BRS_Interactable : MonoBehaviour
+    public class BRS_Interactable : RichMonoBehaviour
     {
         [Header("---Interactable---")]
         [Tooltip("UI Tooltip Prompt that gets displayed to Player.")]
@@ -19,9 +19,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         protected bool playerIsLookingAtObject = false;
 
-        // Use this for initialization
-        void Start()
+        protected override void GatherReferences()
         {
+            base.GatherReferences();
             trackable = gameObject.GetComponent<BRS_Trackable>() as BRS_Trackable; //may or may not exist
         }
 

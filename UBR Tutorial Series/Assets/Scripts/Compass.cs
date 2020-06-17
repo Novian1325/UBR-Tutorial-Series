@@ -13,7 +13,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         Ten = 10
     }
 
-    public class Compass : MonoBehaviour
+    public class Compass : RichMonoBehaviour
     {
         private static readonly float sortsPerSecond = .5f;// every other second
         public RawImage CompassImage;

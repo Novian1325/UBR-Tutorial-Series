@@ -2,7 +2,7 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class MiniMapFollow : MonoBehaviour
+    public class MiniMapFollow : RichMonoBehaviour
     {
         [SerializeField] private bool rotateWithPlayer = true;
         [SerializeField] private int miniMapHeight = 1000;

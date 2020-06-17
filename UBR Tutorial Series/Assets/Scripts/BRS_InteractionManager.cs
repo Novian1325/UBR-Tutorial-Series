@@ -2,7 +2,7 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class BRS_InteractionManager : MonoBehaviour
+    public class BRS_InteractionManager : RichMonoBehaviour
     {
         [Tooltip("The player's 'reach'. The minimum distance one must be in order to interact with anything.")]
         [SerializeField] private int interactionRaycastLimit = 5;
@@ -12,12 +12,11 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private BRS_Interactable interactablePlayerIsLookingAt;
 
         [SerializeField] private bool DEBUG = false;
-        // Use this for initialization
-        void Start()
+
+        protected override void GatherReferences()
         {
-
-            playerCameraXform = Camera.main.transform;
-
+            base.GatherReferences();
+            playerCameraXform = GameObject.FindGameObjectWithTag("MainCamera").transform;
         }
 
         // Update is called once per frame

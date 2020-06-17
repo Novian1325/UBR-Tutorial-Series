@@ -6,10 +6,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 {
     [RequireComponent(typeof(CapsuleCollider))]
     [RequireComponent(typeof(LineRenderer))]
-    public class BRS_ZoneWallManager : MonoBehaviour
+    public class BRS_ZoneWallManager : RichMonoBehaviour
     {
         [Header("---Zone Wall Manager---")]
-
         [Range(16, 360)]
         [Tooltip("How many segments should the circle that appears on the mimimap be? More segments means it looks crisper, but at cost of performance.")]
         [SerializeField] private int lineRendererSegments = 64;//64 seems perfect
@@ -17,13 +16,12 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Tooltip("The projecte image on the rim of ZoneWall. Not needed")]
         [SerializeField] private Projector safeZone_Circle_Projector;
 
-        [Header("---Zone Phase Options---")]
-        
         /// <summary>
         /// Scriptable Object containing options for shrink time, radius, damage.
         /// </summary>
+        [Header("---Zone Phase Options---")]
         [Tooltip("Scriptable Object containing options for shrink time, radius, damage.")]
-        [SerializeField] private ShrinkPhaseOptions scriptableObject_shrinkPhaseOptions;
+        [SerializeField] private ShrinkPhaseOptions shrinkPhaseOptions;
 
 
         #region Private Variables
@@ -91,7 +89,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <summary>
         /// Cached Transform of the parent Object.
         /// </summary>
-        private Transform ZoneWallXform;
+        private Transform ZoneWallXform { get => transform; }
 
         /// <summary>
         /// Capsule Collider attached to this GameObject. Used as a reference for Scale.
@@ -102,20 +100,15 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Tooltip("Would the developer like to see Debug statements about what's going on during runtime?")]
         [SerializeField] private bool DEBUG = false;
 
-        private void Awake()
+        protected override void Awake()
         {
-            //set necessary references to Components
-            capsuleCollider = GetComponent<CapsuleCollider>();
-            lineRenderer = gameObject.GetComponent<LineRenderer>();
-            
+            base.Awake();
+
             //load options from scriptable object
-            shrinkPhases = scriptableObject_shrinkPhaseOptions.shrinkPhases;
+            shrinkPhases = shrinkPhaseOptions.shrinkPhases;
             
             //display linerenderer in space local to center of zone wall, not world
             lineRenderer.useWorldSpace = false;
-
-            //cache transform
-            ZoneWallXform = this.transform;
 
             //get original radius
             originalZoneWallRadius = (int)capsuleCollider.radius;
@@ -149,6 +142,15 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             HandleShrinkingUpdate();
         }
 
+        protected override void GatherReferences()
+        {
+            base.GatherReferences();
+
+            //set necessary references to Components
+            capsuleCollider = GetComponent<CapsuleCollider>();
+            lineRenderer = gameObject.GetComponent<LineRenderer>();
+        }
+
         /// <summary>
         /// Which shrink phase is the Zone Wall currently in?
         /// </summary>
@@ -172,14 +174,15 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             var phasesAreOkay = true;//only takes one to become false
 
             //each subsequent radius must be smaller than the first.
-            //
             var radius = startingZoneWallRadius;
-            foreach(var phase in shrinkPhases)
+            for(var i = 0; i < shrinkPhases.Length; ++i)
             {
+                var phase = shrinkPhases[i];
+
                 //check radius
                 if(phase.shrinkToRadius >= radius)
                 {
-                    Debug.LogError("ERROR! ZoneWallManager: ShrinkPhases are not valid. Check that radii are in descending order.");
+                    Debug.LogError("ERROR! ZoneWallManager: ShrinkPhases are not valid. Check that radii are in descending order.", this);
                     phasesAreOkay = false;
                 }
                 else
@@ -289,7 +292,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             //show on minimap where zone will shrink to
             leadingCircle = CreateLeadingCircle(centerPoint, targetShrunkenRadius, originalZoneWallRadius, lineRendererSegments);
-
         }
 
         /// <summary>

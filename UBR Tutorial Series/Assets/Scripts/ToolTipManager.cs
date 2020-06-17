@@ -3,13 +3,21 @@ using UnityEngine;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class ToolTipManager : MonoBehaviour
+    /// <summary>
+    /// UI Controller that handles prompts to Player
+    /// </summary>
+    public class ToolTipManager : RichMonoBehaviour
     {
-
-        private static ToolTipManager toolTipManagerInstance;//for singleton pattern
+        public static ToolTipManager Instance { get; private set; }//for singleton pattern
 
         [SerializeField] private GameObject skydivePrompt;
+
+        private static GameObject SkyDivePrompt { get => Instance.skydivePrompt; }
+
         [SerializeField] private GameObject deployParachutePrompt;
+
+        private static GameObject DeployParachutePrompt { get => Instance.deployParachutePrompt; }
+
         private List<GameObject> toolTips = new List<GameObject>();
 
         private void InitToolTips()
@@ -17,11 +25,12 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //verify that each prompt exists. If it does, add it to the list for tracking
             if (skydivePrompt) toolTips.Add(skydivePrompt);
             if (deployParachutePrompt) toolTips.Add(deployParachutePrompt);
-
         }
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             //singleton pattern
             SingletonPattern(this); //ensures only one exists, if any
 
@@ -31,56 +40,43 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //all tooltips should start disabled
             DisableAllToolTips();
         }
-
-        // Use this for initialization
-        void Start()
-        {
-
-        }
-
+        
         private static void SingletonPattern(ToolTipManager TTM_instance)
         {
-            if (!toolTipManagerInstance)
+            if (!Instance)
             {
-                toolTipManagerInstance = TTM_instance;
+                Instance = TTM_instance;
             }
             else
             {
                 Destroy(TTM_instance.gameObject);
             }
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
         }
 
         public void DisableAllToolTips()
         {
-            foreach (GameObject tip in toolTips)
+            for (var i = 0; i < toolTips.Count; ++i)
             {
+                var tip = toolTips[i];
                 tip.SetActive(false);
             }
         }
 
-        public void ShowToolTip(ToolTipENUM toolTip, bool active)
+        public static void ShowToolTip(ToolTipENUM toolTip, bool active)
         {
             switch (toolTip)
             {
                 case ToolTipENUM.DEPLOYPARACHUTE:
-                    if (deployParachutePrompt) deployParachutePrompt.SetActive(active);
+                    if (DeployParachutePrompt) DeployParachutePrompt.SetActive(active);
                     break;
+
                 case ToolTipENUM.SKYDIVE:
-                    if (skydivePrompt) skydivePrompt.SetActive(active);
+                    if (SkyDivePrompt) SkyDivePrompt.SetActive(active);
                     break;
+
                 default:
                     break;
             }
         }
-
     }
-
-
 }

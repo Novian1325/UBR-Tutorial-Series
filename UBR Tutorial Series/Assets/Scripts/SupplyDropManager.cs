@@ -3,13 +3,12 @@ using UnityEngine;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class SupplyDropManager : MonoBehaviour
+    public class SupplyDropManager : RichMonoBehaviour
     {
         //only one supplydropmanager should exist
         public static SupplyDropManager supplyDropManagerInstance;
 
         [Header("Supply Drop")]
-
         [Tooltip("Prefab of the Supply Drop. Should have a SupplyDrop component attached.")]
         [SerializeField] private GameObject supplyDropPrefab;
 
@@ -17,7 +16,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [SerializeField] private BRS_PlanePathManager planePathManager;
 
         [Header("Spawn Settings")]
-
         [Tooltip("Should Supply Drops be Deployed on a random timeline? If false, relies on outside code.")]
         [SerializeField] private bool randomTimedDrops = true;
 
@@ -36,7 +34,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private List<SupplyDrop> supplyDropList = new List<SupplyDrop>();
 
         // Use this for initialization
-        void Start()
+        private void Start()
         {
             InitSingletonPattern(this);
 
@@ -46,6 +44,16 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             if (maxSpawnTime < 2)
             {
                 maxSpawnTime = 2;
+            }
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+            if (randomTimedDrops && Time.time > nextSupplyDropSpawnTime)
+            {
+                DeploySupplyDrop();
+                nextSupplyDropSpawnTime += Random.Range(minSpawnTime, maxSpawnTime);
             }
         }
 
@@ -65,17 +73,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 Destroy(SDM_instance.gameObject);
             }
         }
-
-        // Update is called once per frame
-        void Update()
-        {
-            if (randomTimedDrops && Time.time > nextSupplyDropSpawnTime)
-            {
-                DeploySupplyDrop();
-                nextSupplyDropSpawnTime += Random.Range(minSpawnTime, maxSpawnTime);
-            }
-        }
-
+        
         public void AddSupplyDrop(SupplyDrop newSupplyDrop)
         {
             supplyDropList.Add(newSupplyDrop);

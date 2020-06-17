@@ -2,21 +2,27 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class MiniMapIconManager : MonoBehaviour
+    public class MiniMapIconManager : RichMonoBehaviour
     {
-        [SerializeField] private MeshRenderer meshRenderer;
+        private MeshRenderer meshRenderer;
 
         // Use this for initialization
         void Start()
         {
-            meshRenderer = GetComponent<MeshRenderer>();
-
-            if (meshRenderer) ShowIconOnMap(true); //turn on minimap icons
+            if (meshRenderer)
+            {
+                ShowIconOnMap(true); //turn on minimap icons
+            }
             else
             {
                 Debug.LogError("ERROR! No MeshRenderer on MiniMap Icon: " + this.gameObject.name);
             }
+        }
 
+        protected override void GatherReferences()
+        {
+            base.GatherReferences();
+            meshRenderer = GetComponent<MeshRenderer>();
         }
 
         public void ShowIconOnMap(bool active)

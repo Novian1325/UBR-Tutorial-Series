@@ -54,11 +54,18 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// Holder variable for supplies. probably scriptable objects or itemManagers
         /// </summary>
         private GameObject[] supplies;//
-        
+
+        protected override void GatherReferences()
+        {
+            base.GatherReferences();
+            this.rb = this.GetComponent<Rigidbody>() as Rigidbody;
+            if (this.parachute == null) this.parachute = this.GetComponentInChildren<Parachute>();
+        }
+
         // Use this for initialization
         void Start()
         {
-            //
+            //external reference
             supplyDropManager = SupplyDropManager.supplyDropManagerInstance as SupplyDropManager;
             if (supplyDropManager) supplyDropManager.AddSupplyDrop(this);
 
@@ -71,13 +78,11 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             parachuteTerminalVelocity = -Mathf.Abs(parachuteTerminalVelocity); //get the absolutely negative value for downwards velocity
                                                                                //enforce parachuteTerminalVelocity being lower
             parachuteTerminalVelocity = parachuteTerminalVelocity > terminalVelocity ? parachuteTerminalVelocity : terminalVelocity + 1;
-            
-            //snag references
-            this.rb = this.GetComponent<Rigidbody>() as Rigidbody;
-            if (this.parachute == null) this.parachute = this.GetComponentInChildren<Parachute>();
 
-            //set name
+            //set name (don't do this in the actual build)
+            #if UNITY_EDITOR
             SetName(this.gameObject);
+            #endif
         }
 
         // Update is called once per frame
@@ -90,6 +95,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 case SkyDivingStateENUM.startFreeFalling:
                     StartFreeFalling();
                     break;
+
                 case SkyDivingStateENUM.freeFalling:
                     FreeFalling();
                     break;
@@ -234,19 +240,21 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             freefallingState = SkyDivingStateENUM.parachuting;
         }
 
+#if UNITY_EDITOR
         /// <summary>
         /// Sets the name of the supply drop so the developer can find it in hierarchy.
         /// </summary>
         /// <param name="go"></param>
         private static void SetName(GameObject go)
         {
-            System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+            var stringBuilder = new System.Text.StringBuilder();
 
             stringBuilder.Append("Supply Drop # ");
             stringBuilder.Append(++supplyDropCount);//track name
 
             go.name = stringBuilder.ToString();//faster than concatenation +
         }
+#endif
 
         /// <summary>
         /// Do the behavior. Cue interaction.

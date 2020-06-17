@@ -2,7 +2,7 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class LookAtCamera : MonoBehaviour
+    public class LookAtCamera : RichMonoBehaviour
     {
         private Transform target;
 
@@ -13,7 +13,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         void Update()
         {
-            this.transform.LookAt(new Vector3(target.position.x, target.position.y, target.position.z));
+            transform.LookAt(new Vector3(target.position.x, target.position.y, target.position.z));
         }
     }
 

@@ -9,7 +9,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
     /// This class handles checking if the behavior is outside of the bounds and deals damage accordingly.
     /// </summary>
     [RequireComponent(typeof(Collider))]
-    public class BRS_ZoneDamage : MonoBehaviour
+    public class BRS_ZoneDamage : RichMonoBehaviour
     {
         #region static variables
         /// <summary>
@@ -76,8 +76,10 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         #endregion
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             //handle static references
             InitStaticReferences();
         }

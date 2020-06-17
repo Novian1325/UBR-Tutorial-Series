@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class SmoothFollow : MonoBehaviour
+public class SmoothFollow : RichMonoBehaviour
 {
 	public Transform followTarget;
 	public float smoothSpeed = 10.0f;

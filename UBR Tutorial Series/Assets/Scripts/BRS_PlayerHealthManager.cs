@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class BRS_PlayerHealthManager : MonoBehaviour
+    public class BRS_PlayerHealthManager : RichMonoBehaviour
     {
         /// <summary>
         /// Amount of health this Manager currently has.

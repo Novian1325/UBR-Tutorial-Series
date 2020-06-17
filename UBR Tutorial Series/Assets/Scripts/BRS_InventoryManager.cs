@@ -6,7 +6,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
     /// <summary>
     /// Manages a List of Inventory Slots that track items
     /// </summary>
-    public class BRS_InventoryManager : MonoBehaviour
+    public class BRS_InventoryManager : RichMonoBehaviour
     {
         [SerializeField] private int maxInventorySlots = 4;
 
@@ -20,18 +20,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         private int currentUsedSlots = 0;//slightly more performant than checking Count value of list
         
-        // Use this for initialization
-        void Start()
-        {
-
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-
-        }
-
         /// <summary>
         /// Adds given item quantity or entire item to Inventory if there is sufficient space.
         /// </summary>
@@ -44,7 +32,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //is inventory at max capacity?
             if(currentUsedSlots == maxInventorySlots)
             {
-                ;
+                //nada
             }
             else
             {

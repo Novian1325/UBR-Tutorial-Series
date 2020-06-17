@@ -2,6 +2,7 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
+    [RequireComponent(typeof(Animator))]
     public class DoorHandler : BRS_Interactable
     {
         [Header("Door Handler")]
@@ -12,17 +13,14 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Tooltip("Can the door open in either direction?")]
         [SerializeField] bool doorOpensBackward = false;
 
+        //member components
         private Animator animator;//animator attached to this object
-        private Transform xform;//cached for performance
         private Vector3 actorDirection;//direction the actor is facing
-
-        // Use this for initialization
-        void Start()
+        
+        protected override void GatherReferences()
         {
-
+            base.GatherReferences();
             animator = this.GetComponent<Animator>();
-            xform = this.transform;//cache for performance
-
         }
 
         new private void Update()
@@ -73,7 +71,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             if (!doorOpensBackward) return false;
 
             bool openDoorBackwards = true;
-            float angleOfPlayerToDoor = Vector3.Angle(actorDirection, xform.forward);
+            float angleOfPlayerToDoor = Vector3.Angle(actorDirection, transform.forward);
 
             //is the player standing behind or in front of the door?
             if (angleOfPlayerToDoor < 90)

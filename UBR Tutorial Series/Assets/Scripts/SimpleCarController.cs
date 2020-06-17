@@ -2,7 +2,8 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class SimpleCarController : MonoBehaviour
+    [RequireComponent(typeof(Rigidbody))]
+    public class SimpleCarController : RichMonoBehaviour
     {
         private float m_horizontalInput;
         private float m_verticalInput;
@@ -16,16 +17,19 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         public Transform rearDriverT, rearPassengerT;
         public float maxSteerAngle = 30;
         public float motorForce = 50;
-
-        public void Start()
+        
+        private void FixedUpdate()
         {
-            rb = GetComponent<Rigidbody>();
+            GetInput();
+            Steer();
+            Accelerate();
+            UpdateWheelPoses();
         }
 
-        public void GetInput()
+        protected override void GatherReferences()
         {
-            m_horizontalInput = Input.GetAxis("Horizontal");
-            m_verticalInput = Input.GetAxis("Vertical");
+            base.GatherReferences();
+            rb = GetComponent<Rigidbody>();
         }
 
         private void Steer()
@@ -61,12 +65,10 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         }
 
-        private void FixedUpdate()
+        public void GetInput()
         {
-            GetInput();
-            Steer();
-            Accelerate();
-            UpdateWheelPoses();
+            m_horizontalInput = Input.GetAxis("Horizontal");
+            m_verticalInput = Input.GetAxis("Vertical");
         }
 
         public void OnPlayerExit()
@@ -75,10 +77,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             rb.angularVelocity = Vector3.zero;
             frontDriverW.motorTorque = 0;
             frontPassengerW.motorTorque = 0;
-            //maybe also freeze all rb.Constraints to avoid sliding downhill
+            //maybe also freeze all rb.Constraints to avoid sliding downhill (parking brake)
         }
 
     }
-
 
 }

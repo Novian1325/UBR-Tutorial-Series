@@ -2,7 +2,9 @@ using UnityEngine;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class SkyDiveHandler : MonoBehaviour
+    [RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(Rigidbody))]
+    public class SkyDiveHandler : RichMonoBehaviour
     {
         #region Variables
 
@@ -68,6 +70,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private readonly float cameraMinPitch = -90;
         private readonly float cameraMaxPitch = 90;
 
+        //exterior components
+        private Transform cameraXform;
+
         //component references
         private Rigidbody rb;
         private Animator anim;
@@ -95,31 +100,13 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private float zoomLength;
 
         #endregion
-
-        public void InitRotationTransforms()
+        
+        private void Start()
         {
-            //save rotation starting values
-            characterTransform = this.transform;
-            m_CharacterTargetRot = characterTransform.transform.localRotation;
-            m_CameraTargetRot = cameraPivotTransform.localRotation;
-            m_CharacterSwoopTargetRot = characterSwoopTransform.localRotation;
-            m_CharacterRollTargetRot = characterRollAxis.localRotation;
-        }
-
-        private void Awake()
-        {
-            //gather references
-            if (playerController == null) playerController = gameObject.GetComponent<BRS_TPController>() as BRS_TPController;
-
-            rb = gameObject.GetComponent<Rigidbody>() as Rigidbody;
-            anim = gameObject.GetComponent<Animator>() as Animator;
             InitRotationTransforms();
-        }
 
-        void Start()
-        {
             //disable if not in a begin skydiving state. Wait to be started externally
-            if(skyDivingState != SkyDivingStateENUM.startFreeFalling)
+            if (skyDivingState != SkyDivingStateENUM.startFreeFalling)
             {
                 this.enabled = false;//enable by calling BeginSkyDiving();
             }
@@ -129,6 +116,26 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             {
                 terminalVelocity *= -1;//invert if above 0
             }
+        }
+
+        protected override void GatherReferences()
+        {
+            base.GatherReferences();
+            if (!playerController)
+                playerController = gameObject.GetComponent<BRS_TPController>() as BRS_TPController;
+            rb = gameObject.GetComponent<Rigidbody>() as Rigidbody;
+            anim = gameObject.GetComponent<Animator>() as Animator;
+            cameraXform = GameObject.FindGameObjectWithTag("MainCamera").transform;
+        }
+
+        private void InitRotationTransforms()
+        {
+            //save rotation starting values
+            characterTransform = this.transform;
+            m_CharacterTargetRot = characterTransform.localRotation;
+            m_CameraTargetRot = cameraPivotTransform.localRotation;
+            m_CharacterSwoopTargetRot = characterSwoopTransform.localRotation;
+            m_CharacterRollTargetRot = characterRollAxis.localRotation;
         }
 
         /// <summary>
@@ -190,7 +197,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             SetTargetRotations();
             ParachuteStrafe();//move left/right when parachuting
             HandlePlayerMovement();//rotate character model;//maybe handle drag differently here?
-
         }
 
         /// <summary>
@@ -240,7 +246,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                     targetFM = Mathf.Lerp(targetForwardMomentum, -maxFM, Time.deltaTime * returnToNeutralSpeed); //if swooping
                 }
             }
-
             else
             {
                 //do the normal stuff
@@ -267,7 +272,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             float characterRotationX = verticalInput * camPitch;//get swoop input //character pitch
             float characterRotationY = Input.GetAxis("Mouse X") * MouseXSensitivity;//get yaw input
             float characterRotationZ = (rollFactor * characterRotationY) * attitudeChangeSpeed;//get roll input, also adding a portion of the yaw input means the char rolls into turns
-
 
             //restrict rolling to freefalling only, for now.  Can swing when parachuting
             characterRotationZ = (skyDivingState == SkyDivingStateENUM.freeFalling) ? characterRotationZ : 0;//force to zero roll if not skydiving
@@ -322,7 +326,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         private void HandleCameraZoomOut()
         {
-            Transform cameraXform = Camera.main.transform;
             float journeyedPercent = ((Time.time - zoomStartTime) * zoomSpeed) / zoomLength;
             if (journeyedPercent >= .95f) return; //stop after the camera gets close enough
             cameraXform.position = Vector3.Lerp(cameraXform.position, zoomPoint.position, journeyedPercent);
@@ -333,13 +336,12 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         private void HandleCameraZoomIn()
         {
-            Transform cameraXform = Camera.main.transform;
             float journeyedPercent = (Time.time - zoomStartTime) * zoomSpeed / zoomLength;
+
             if (journeyedPercent >= .95f)
             {
                 this.enabled = false;//TURN OFF DISABLE THIS SCRIPT. CAMERA ZOOM IN IS FINAL THING.
             }
-
             else
             {
                 //Debug.Log(journeyedPercent);

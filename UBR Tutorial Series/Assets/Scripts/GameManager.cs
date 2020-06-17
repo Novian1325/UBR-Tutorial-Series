@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : RichMonoBehaviour
     {
         [Header("GameSettings")]
         [Tooltip("Enable to have the Players start in the airplane. Disable to allow them to start on ground.")]
@@ -23,21 +23,10 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Tooltip("This is the height the Player will start at if \"startSkyDiving\" is true.")]
         [SerializeField] private int skyDiveTestHeight = 500;
 
-        private void Awake()
-        {
-            VerifyReferences();
-        }
-
-        private void DeployPlayersInPlane()
-        {
-            planePathManager.InitPlaneDrop(players);
-
-
-        }
-
         // Use this for initialization
         void Start()
         {
+            VerifyReferences();
 
             //populate loot
             //determine mission
@@ -67,6 +56,11 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             }
 
+        }
+
+        private void DeployPlayersInPlane()
+        {
+            planePathManager.InitPlaneDrop(players);
         }
 
         private bool VerifyReferences()

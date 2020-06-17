@@ -2,31 +2,28 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class BRS_Trackable : MonoBehaviour
+    public class BRS_Trackable : RichMonoBehaviour
     {
 
         [SerializeField] private Texture compassImage;
         [SerializeField] private float revealDistance;
         [SerializeField] private Color iconColor;
-        private Transform cachedTransform;
 
         private static Compass compassInstance;
 
-        private void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             //only the first trackable has to do the hard work
             InitStaticCompassInstance();
 
             //if there's no compass, there's no work to do
             if (!compassInstance)
             {
-
                 Debug.LogError("ERROR! No BRS_Compass in scene! nothing to register trackable to.");
                 this.enabled = false;
             }
-            
-            //cache transform
-            cachedTransform = this.transform;
         }
 
         /// <summary>
@@ -54,7 +51,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             if (compassInstance && compassImage) {
                 compassInstance.RegisterTrackable(this);
             }
-            
         }
 
         private void OnDisable()
@@ -96,7 +92,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         public Transform GetTrackableTransform()
         {
-            return this.cachedTransform;
+            return transform;
         }
     }
 }
