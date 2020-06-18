@@ -13,6 +13,7 @@ public static class SceneMenu
     //    EditorSceneManager.OpenScene("Assets/Scenes/EmpiresEdge.unity");
     //}
 
+        [MenuItem("SceneMenu/Workshop")]
     private static void LoadWorkshopScene()
     {
         EditorSceneManager.OpenScene("Assets/Scenes/Workshop.unity");
