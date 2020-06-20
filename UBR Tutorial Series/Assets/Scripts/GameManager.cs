@@ -32,7 +32,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //determine mission
             //spawn certain enemies and specific locations
 
-
         }
 
         // Update is called once per frame
@@ -53,9 +52,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                         skyDiveTestHeight, skyDiveController.transform.position.z);
 
                 skyDiveController.BeginSkyDive();
-
             }
-
         }
 
         private void DeployPlayersInPlane()
@@ -72,7 +69,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 players = GameObject.FindGameObjectsWithTag("Player");
                 if (players.Length < 1)//if no players tagged
                 {
-
                     Debug.LogError("ERROR! No Players found in scene. Tag one or double check BRS TPC.");
                     allReferencesOkay = false;
                 }
@@ -93,12 +89,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 {
                     skyDiveController = players[0].GetComponent<SkyDiveHandler>();
                 }
-
             }
             return allReferencesOkay;
-
         }
     }
-
-
 }

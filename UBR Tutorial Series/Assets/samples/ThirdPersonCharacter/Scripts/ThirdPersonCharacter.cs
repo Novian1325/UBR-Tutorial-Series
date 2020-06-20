@@ -29,6 +29,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		CapsuleCollider m_Capsule;
 		bool m_Crouching;
 
+
 		void Start()
 		{
 			m_Animator = GetComponent<Animator>();
@@ -40,6 +41,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			m_Rigidbody.constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ;
 			m_OrigGroundCheckDistance = m_GroundCheckDistance;
 		}
+
 
 		public void Move(Vector3 move, bool crouch, bool jump)
 		{
@@ -72,6 +74,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			// send input and other state parameters to the animator
 			UpdateAnimator(move);
 		}
+
 
 		void ScaleCapsuleForCrouching(bool crouch)
 		{
@@ -111,6 +114,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			}
 		}
 
+
 		void UpdateAnimator(Vector3 move)
 		{
 			// update the animator parameters
@@ -148,6 +152,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			}
 		}
 
+
 		void HandleAirborneMovement()
 		{
 			// apply extra gravity from multiplier:
@@ -156,6 +161,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
 			m_GroundCheckDistance = m_Rigidbody.velocity.y < 0 ? m_OrigGroundCheckDistance : 0.01f;
 		}
+
 
 		void HandleGroundedMovement(bool crouch, bool jump)
 		{
@@ -177,6 +183,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			transform.Rotate(0, m_TurnAmount * turnSpeed * Time.deltaTime, 0);
 		}
 
+
 		public void OnAnimatorMove()
 		{
 			// we implement this function to override the default root motion.
@@ -190,6 +197,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 				m_Rigidbody.velocity = v;
 			}
 		}
+
 
 		void CheckGroundStatus()
 		{
