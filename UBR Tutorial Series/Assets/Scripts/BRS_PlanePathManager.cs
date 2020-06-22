@@ -27,7 +27,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [SerializeField] private int planeSpeed_SupplyDrop = 300;
 
         [Tooltip("Enables Debug.Log statements and persistence of objects for debugging purposes.")]
-        [SerializeField] private bool DEBUG = false;//if true, prints debug statements
+        [SerializeField] private bool DEBUG = true;//if true, prints debug statements
 
         private GameObject[] acceptableDropZones;
 
