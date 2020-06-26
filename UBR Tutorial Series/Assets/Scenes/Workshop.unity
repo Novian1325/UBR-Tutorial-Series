@@ -1495,7 +1495,7 @@ PrefabInstance:
     - target: {fileID: 7734979133578322180, guid: db6113bfb959a9444acdc5290ca3075e,
         type: 3}
       propertyPath: startInPlane
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7734979133578322180, guid: db6113bfb959a9444acdc5290ca3075e,
         type: 3}
@@ -1505,7 +1505,7 @@ PrefabInstance:
     - target: {fileID: 7734979133578322180, guid: db6113bfb959a9444acdc5290ca3075e,
         type: 3}
       propertyPath: startSkyDiving
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7734979133578322180, guid: db6113bfb959a9444acdc5290ca3075e,
         type: 3}

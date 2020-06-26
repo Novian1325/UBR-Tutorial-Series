@@ -74,6 +74,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 }
                 else
                 {
+                    Debug.Log("Players Found!");
                 }
             }
 

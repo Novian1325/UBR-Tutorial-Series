@@ -231,6 +231,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <returns></returns>
         public bool InitPlaneDrop(GameObject[] incomingCargo)
         {
+            Debug.Log("Trying to be in the plane.");
             foreach (var cargo in incomingCargo)
             {
                 LoadCargo(cargo);
