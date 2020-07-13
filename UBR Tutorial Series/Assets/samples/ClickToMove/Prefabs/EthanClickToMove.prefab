@@ -1137,7 +1137,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   target: {fileID: 0}
-  targetPosition: {x: 0, y: 0, z: 0}
 --- !u!114 &114144929423625640
 MonoBehaviour:
   m_ObjectHideFlags: 0
