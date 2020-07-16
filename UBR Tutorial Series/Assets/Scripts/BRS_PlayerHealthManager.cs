@@ -31,6 +31,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Header("---Health UI---")]
         [SerializeField] private Slider healthSlider;
         [SerializeField] private Text healthText;
+
+        public bool IsDead { get; private set; } = false;
         
         // Use this for initialization
         void Start()
@@ -39,11 +41,18 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             {
                 healthSlider.maxValue = maxHealth;//max
                 healthSlider.minValue = 0;//health cannot go below 0
-                
-                //update UI
-                healthSlider.value = currentHealth;
             }
 
+            UpdateUI();
+        }
+
+        private void UpdateUI()
+        {
+            //update UI
+            if (healthSlider)
+            {
+                healthSlider.value = currentHealth;
+            }
             if (healthText)
             {
                 healthText.text = currentHealth.ToString();
@@ -58,23 +67,17 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         {
             currentHealth += changeAmount;
 
-            if (currentHealth <= 0)
+            if (currentHealth <= 0 && !IsDead)
             {
+                IsDead = true;
                 //do death stuff
+                Debug.Log("I am defeated! No other death logic in place", this);
             }
 
             //health cannot be less than 0 or greater than MaxHealth
             currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
-            //update UI
-            if (healthSlider)
-            {
-                healthSlider.value = currentHealth;
-            }
-            if (healthText)
-            {
-                healthText.text = currentHealth.ToString();
-            }
+            UpdateUI();
         }
 
         /// <summary>
@@ -86,14 +89,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             currentHealth = maxHealth;
 
             //update UI
-            if (healthSlider)
-            {
-                healthSlider.value = currentHealth;
-            }
-            if (healthText)
-            {
-                healthText.text = currentHealth.ToString();
-            }
+            UpdateUI();
         }
 
         /// <summary>
@@ -112,6 +108,11 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         public void ChangeMaxHealth(int amount)
         {
             maxHealth += amount;
+            if (healthSlider)
+            {
+                healthSlider.maxValue = maxHealth;//max
+            }
+
         }
 
         public float GetCurrentHealth()
