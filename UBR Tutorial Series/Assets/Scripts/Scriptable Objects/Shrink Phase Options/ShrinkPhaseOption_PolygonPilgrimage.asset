@@ -4,7 +4,8 @@
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
@@ -17,34 +18,34 @@ MonoBehaviour:
     secondsToFullyShrink: 180
     shrinkToRadius: 250
     ticksPerSecond: 1
-    damagePerTick: 100
+    damagePerTick: 1
   - secondsUntilShrinkBegins: 120
     secondsToFullyShrink: 120
     shrinkToRadius: 125
     ticksPerSecond: 1
-    damagePerTick: 100
+    damagePerTick: 2
   - secondsUntilShrinkBegins: 90
     secondsToFullyShrink: 90
     shrinkToRadius: 60
     ticksPerSecond: 1
-    damagePerTick: 100
+    damagePerTick: 3
   - secondsUntilShrinkBegins: 80
     secondsToFullyShrink: 70
     shrinkToRadius: 30
     ticksPerSecond: 1
-    damagePerTick: 100
+    damagePerTick: 4
   - secondsUntilShrinkBegins: 50
     secondsToFullyShrink: 60
     shrinkToRadius: 15
     ticksPerSecond: 1
-    damagePerTick: 100
+    damagePerTick: 5
   - secondsUntilShrinkBegins: 30
     secondsToFullyShrink: 60
     shrinkToRadius: 7
     ticksPerSecond: 1
-    damagePerTick: 100
+    damagePerTick: 10
   - secondsUntilShrinkBegins: 0
     secondsToFullyShrink: 55
     shrinkToRadius: 3
     ticksPerSecond: 1
-    damagePerTick: 100
+    damagePerTick: 20
