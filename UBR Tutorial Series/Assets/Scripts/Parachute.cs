@@ -2,6 +2,8 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
+    [RequireComponent(typeof(Animator))]
+    [RequireComponent(typeof(MeshRenderer))]
     public class Parachute : RichMonoBehaviour
     {
         private Animator anim;
