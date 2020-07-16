@@ -9,6 +9,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
     /// <seealso cref="BRS_PlanePathManagerInspector"/>
     public class BRS_PlanePathManager : RichMonoBehaviour
     {
+        private const string DROPZONE_LAYER_NAME = "DropZoneTest";
+
         //visible to Inspector
         [Header("Map Settings")]
         [Tooltip("This is the spawn boundary for the airplane. Airplane will spawn at the very edge of this cylinder/sphere")]
@@ -189,6 +191,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <param name="cargo"></param>
         private void LoadCargo(GameObject cargo)
         {
+            planeContainsPlayers = false; // assume false
             if (cargo.CompareTag("Player"))
             {
                 cargo_Players.Add(cargo);
@@ -198,7 +201,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             {
                 cargo_Supplies = cargo;//set supplies
             }
-
         }
 
         /// <summary>
@@ -300,7 +302,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                     //SUCCESS!!!!!!! 
                     //reset variables for next path
                     planeFlightAltitude = startingFlightAltitude;//reset altitude for next try
-                    planeContainsPlayers = false;//prove me right
                     unsuccessfulPasses = 0; // track to prevent infinite loops
                     return true;
                 }
@@ -372,15 +373,28 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private bool TestRaycastThroughDropZone(Vector3 startPoint, 
             Vector3 targetObject, GameObject[] acceptableDropZones)
         {
+            if (DEBUG)
+            {
+                Debug.Log("[PlanePathManger] dropZone Count: " + acceptableDropZones.Length);
+            }
+
             //did the raycast go through a drop zone?
             var raycastThroughDropZone = false;
+
+            var oldLayer = acceptableDropZones[0].layer;
+            var testLayer = LayerMask.NameToLayer(DROPZONE_LAYER_NAME);
+            var layerMask = LayerMask.GetMask(DROPZONE_LAYER_NAME);
+            foreach (var zone in acceptableDropZones)
+            {
+                zone.layer = testLayer; // set on individual layer for performance and to avoid overlap
+            }
 
             //RaycastHit will store information about anything hit by the raycast
             RaycastHit raycastHitInfo;
             //raycast
             if (Physics.Raycast(startPoint, targetObject - startPoint, out raycastHitInfo, 
                 (spawnBoundsCircleRadius + 10) * 2,
-                Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide))
+                layerMask, QueryTriggerInteraction.Collide))
             {
                 if (DEBUG)
                 {
@@ -405,6 +419,11 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             else
             {
                 //Debug.LogError("ERROR! Raycast missed target LZ");
+            }
+
+            foreach (var zone in acceptableDropZones)
+            {
+                zone.layer = oldLayer; // set on individual layer for performance and to avoid overlap
             }
 
             return raycastThroughDropZone;
