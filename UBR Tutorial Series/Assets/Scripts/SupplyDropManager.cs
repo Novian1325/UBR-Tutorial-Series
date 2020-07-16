@@ -74,16 +74,27 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             }
         }
         
+        /// <summary>
+        /// Used if A drop is spawned elsewhere in Scene.
+        /// </summary>
+        /// <param name="newSupplyDrop"></param>
         public void AddSupplyDrop(SupplyDrop newSupplyDrop)
         {
             supplyDropList.Add(newSupplyDrop);
         }
 
+        /// <summary>
+        /// Used if A drop is spawned elsewhere in Scene.
+        /// </summary>
+        /// <param name="newSupplyDrop"></param>
         public void RemoveSupplyDrop(SupplyDrop supplyDrop)
         {
             supplyDropList.Remove(supplyDrop);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         [ContextMenu("DeploySupplyDrop()")]//can call this function from the ComponentMenu (gear icon in the top-right corner of a Component)
         public void DeploySupplyDrop()
         {
