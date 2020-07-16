@@ -43,8 +43,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49c599b01463249429235dafe0549368, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  developerDescription: Enter a description.
-  supplyDropPrefab: {fileID: 0}
+  developerDescription: I spawn Supply Drops every so often
+  supplyDropPrefab: {fileID: 4572313994018349613, guid: b02dc163726333945aae116c9d83a3c2,
+    type: 3}
   planePathManager: {fileID: 0}
   randomTimedDrops: 1
   initialDelayInSeconds: 30
