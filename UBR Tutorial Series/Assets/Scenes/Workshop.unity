@@ -955,11 +955,6 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: ca26bfba3f0188d429939cf297b2d5dc, type: 2}
-    - target: {fileID: 7734979132724800150, guid: db6113bfb959a9444acdc5290ca3075e,
-        type: 3}
-      propertyPath: DEBUG
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7734979133005688346, guid: db6113bfb959a9444acdc5290ca3075e,
         type: 3}
       propertyPath: shrinkPhaseOptions
@@ -979,7 +974,7 @@ PrefabInstance:
     - target: {fileID: 7734979133334230801, guid: db6113bfb959a9444acdc5290ca3075e,
         type: 3}
       propertyPath: m_Enabled
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7734979133334230815, guid: db6113bfb959a9444acdc5290ca3075e,
         type: 3}
@@ -1094,7 +1089,7 @@ PrefabInstance:
     - target: {fileID: 7734979133578322180, guid: db6113bfb959a9444acdc5290ca3075e,
         type: 3}
       propertyPath: deployPlayersMode
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7734979133602693337, guid: db6113bfb959a9444acdc5290ca3075e,
         type: 3}
