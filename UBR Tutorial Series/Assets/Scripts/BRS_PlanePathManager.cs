@@ -30,6 +30,10 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Tooltip("The plane's airspeed when on a supply drop sortie")]
         [SerializeField] private int planeSpeed_SupplyDrop = 300;
 
+        [Tooltip("Helps prevent infinite loops.")]
+        [SerializeField]
+        private int flightPathChecksUntilFailure = 50;
+
         [Tooltip("Enables Debug.Log statements and persistence of objects for debugging purposes.")]
         [SerializeField] private bool DEBUG = true;//if true, prints debug statements
 
@@ -56,7 +60,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         //to prevent infinite loops
         private int unsuccessfulPasses = 0;
-        private readonly int flightPathChecksUntilFailure = 15;
 
         //stuff to pass on to plane when deployed
         private GameObject targetDropZone;
@@ -159,7 +162,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         private void ConfigureFlightType()
         {
-            acceptableDropZones = planeContainsPlayers ? playerDropZones : playerDropZones;
+            acceptableDropZones = planeContainsPlayers ? playerDropZones : supplyDropZones;
             planeFlightSpeed = planeContainsPlayers ? planeSpeed_PlayerDrop : planeSpeed_SupplyDrop;
         }
 
@@ -204,13 +207,13 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         public bool InitPlaneDrop()
         {
             ConfigureFlightType();
-            if (SetupFlightPath())
+            var success = SetupFlightPath();
+            if (success)
             {
                 SpawnPlane();//catch the plane Manager to keep track of the plane further
-                return true;
             }
 
-            return false;
+            return success;
         }
 
         /// <summary>
@@ -320,16 +323,17 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //this altitude is not working. keep raising
             if (++unsuccessfulPasses > flightPathChecksUntilFailure)//we've been here before
             {
-                Debug.LogWarning("ERROR! Flight path failed after " 
-                    + unsuccessfulPasses * flightPathChecksUntilFailure 
+                Debug.LogError("ERROR! Flight path failed after " 
+                    + unsuccessfulPasses * flightPathChecksUntilFailure
                     + " attempts. Adjust planeSpawnBounds. Skipping Plane Deployment", this);
+                unsuccessfulPasses = 0;
+                planeFlightAltitude = startingFlightAltitude;//reset altitude for next try
                 return false;
             }
             //raise altitude and try again
             planeFlightAltitude += failedPathAltitudeIncrementAmount;
             //try again
             return SetupFlightPath();
-
 
         }//end func
 
@@ -370,13 +374,21 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         {
             //did the raycast go through a drop zone?
             var raycastThroughDropZone = false;
+
             //RaycastHit will store information about anything hit by the raycast
             RaycastHit raycastHitInfo;
             //raycast
-            if (Physics.Raycast(startPoint, targetObject - startPoint, out raycastHitInfo, spawnBoundsCircleRadius * 2))
+            if (Physics.Raycast(startPoint, targetObject - startPoint, out raycastHitInfo, (spawnBoundsCircleRadius + 10) * 2,
+                Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide))
             {
-                if (DEBUG) Debug.Log("Testing Raycast Through DropZone. Hit: " 
-                    + raycastHitInfo.collider.gameObject.name, this);
+                if (DEBUG)
+                {
+                    Debug.Log("Testing Raycast Through DropZone. Hit: "
+                    + raycastHitInfo.collider.gameObject.name, raycastHitInfo.collider.gameObject);
+
+                    Debug.Log("Possible Zone Count: " + acceptableDropZones.Length);
+                }
+
                 for (var i = 0; i < acceptableDropZones.Length; ++i)//look through each drop zone in list
                 {
                     if (raycastHitInfo.collider.gameObject == acceptableDropZones[i])//if the game object that was hit is inside this list of good zones
@@ -409,10 +421,17 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //RaycastHit holds info about raycast
             RaycastHit raycastHitInfo;
             //if something was hit...
-            if (Physics.Raycast(startPoint, targetObject.transform.position - startPoint, out raycastHitInfo, spawnBoundsCircleRadius * 2, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            if (Physics.Raycast(startPoint, targetObject.transform.position - startPoint, out raycastHitInfo, spawnBoundsCircleRadius * 2, 
+                Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
-                if (DEBUG) Debug.Log("Testing Raycast against Endpoint. Hit: " 
-                    + raycastHitInfo.collider.gameObject.name, this);
+                if (DEBUG)
+                {
+                    Debug.Log("Testing Raycast against Endpoint. Hit: "
+                    + raycastHitInfo.collider.gameObject.name, raycastHitInfo.collider.gameObject);
+
+                    Debug.DrawRay(startPoint, targetObject.transform.position - startPoint,
+                        Color.green, 10, false);
+                }
                 //set bool to whether the object ray hit is same as target
                 raycastHitEndpoint = raycastHitInfo.collider.gameObject == targetObject;
             }
@@ -420,6 +439,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             {
                 //Debug.LogError("ERROR! Raycast missed it's target: " + targetObject);
             }
+
             return raycastHitEndpoint;
         }
 
