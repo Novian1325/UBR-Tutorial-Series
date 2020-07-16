@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Text;
+using UnityEngine;
 
 //NOTE! Sizes and lengths are given in Unity Meters unless otherwise noted.
 
@@ -131,7 +132,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //verfiy input
             if (!VerifyShrinkPhases())
             {
-                Debug.LogError("ERROR! Shrink Phases in Zone Wall Options are not valid. Check input and try again.", this.gameObject);
+                Debug.LogError("[ZoneWallManager]" +
+                    " Shrink Phases in Zone Wall Options are not valid." +
+                    " Check input and try again.", this.gameObject);
             }
 
             //set target bounds
@@ -139,7 +142,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             
             //apply starting values
             ShrinkEverything();
-
         }
 
         void Update()
@@ -187,7 +189,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 //check radius
                 if(phase.shrinkToRadius >= radius)
                 {
-                    Debug.LogError("ERROR! ZoneWallManager: ShrinkPhases are not valid. Check that radii are in descending order.", this);
+                    Debug.LogError("[ZoneWallManager] ShrinkPhases are not valid. " 
+                        + "Check that radii are in descending order.", this);
                     phasesAreOkay = false;
                 }
                 else
@@ -198,7 +201,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 //check shrink seconds to avoid divide by zero on bad input
                 if(phase.ticksPerSecond <= 0)
                 {
-                    Debug.LogError("ERROR! Ticks per second must be a positive integer! : " + phase.ticksPerSecond);
+                    Debug.LogError("[ZoneWallManager] Ticks per second must" +
+                        " be a positive integer! : " + phase.ticksPerSecond);
                 }
             }
 
@@ -212,7 +216,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         {//is the zone currently in a shrinking state
             if (shrinking)
             {
-
                 //shrink all the things
                 ShrinkEverything();
 
@@ -225,7 +228,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             else if (Time.time > nextShrinkTime)
             {
                 shrinking = true;
-                if (DEBUG) Debug.Log("Shrinking....");
+                if (DEBUG) Debug.Log("[ZoneWallManager] Shrinking....");
             }
 
             else
@@ -233,9 +236,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 if (DEBUG)
                 {
                     //use string builder because concatentation ( + ) is expensive
-                    System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+                    StringBuilder stringBuilder = new StringBuilder();
 
-                    stringBuilder.Append("Zone Wall shrinking in ");
+                    stringBuilder.Append("[ZoneWallManager] Shrinking in ");
                     stringBuilder.Append(nextShrinkTime - Time.time);
 
                     Debug.Log(stringBuilder.ToString());
@@ -248,15 +251,17 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         private void ConfigureNewCenterPoint()
         {
-            centerPoint = FindNewCenterPoint(ZoneWallXform.position, currentZoneWallRadius, targetShrunkenRadius, DEBUG);
-            distanceToMoveCenter = Vector3.Distance(ZoneWallXform.position, centerPoint); //this is used in the Lerp (below)
+            centerPoint = FindNewCenterPoint(ZoneWallXform.position, 
+                currentZoneWallRadius, targetShrunkenRadius, DEBUG);
+            distanceToMoveCenter = Vector3.Distance(
+                ZoneWallXform.position, centerPoint); //this is used in the Lerp (below)
 
             if (DEBUG)
             {
                 //build new center point message
-                System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+                StringBuilder stringBuilder = new StringBuilder();
 
-                stringBuilder.Append("New Center Point: ");
+                stringBuilder.Append("[ZoneWallManager] New Center Point: ");
                 stringBuilder.Append(centerPoint);
 
                 Debug.Log(stringBuilder.ToString());
@@ -269,16 +274,27 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private void ShrinkEverything()
         {
             // shrink the zone diameter, over time
-            currentZoneWallRadius = Mathf.MoveTowards(currentZoneWallRadius, targetShrunkenRadius, (targetShrunkenRadius / shrinkPhases[shrinkPhaseIndex].secondsToFullyShrink) * Time.deltaTime);
+            currentZoneWallRadius = Mathf.MoveTowards(currentZoneWallRadius, 
+                targetShrunkenRadius, 
+                (targetShrunkenRadius / shrinkPhases[shrinkPhaseIndex]
+                .secondsToFullyShrink) * Time.deltaTime);
+
+            var sizeRatio = currentZoneWallRadius / originalZoneWallRadius;
 
             //shrink the zoneWall object and all of its children
-            ZoneWallXform.localScale = new Vector3((currentZoneWallRadius / originalZoneWallRadius), 1, (currentZoneWallRadius / originalZoneWallRadius)); //set local scale of zone wall
+            ZoneWallXform.localScale = 
+                new Vector3(  sizeRatio, 1, sizeRatio); //set local scale of zone wall
 
             //move ZoneWall towards new centerpoint
-            ZoneWallXform.position = Vector3.MoveTowards(ZoneWallXform.position, new Vector3(centerPoint.x, ZoneWallXform.position.y, centerPoint.z), (distanceToMoveCenter / shrinkPhases[shrinkPhaseIndex].secondsToFullyShrink) * Time.deltaTime);
+            ZoneWallXform.position = Vector3.MoveTowards(
+                ZoneWallXform.position, //current position
+                new Vector3(centerPoint.x, ZoneWallXform.position.y, centerPoint.z), 
+                (distanceToMoveCenter / shrinkPhases[shrinkPhaseIndex]
+                .secondsToFullyShrink) * Time.deltaTime);
 
             // shrink circle projector
-            if (safeZone_Circle_Projector) safeZone_Circle_Projector.orthographicSize = currentZoneWallRadius;
+            if (safeZone_Circle_Projector)
+                safeZone_Circle_Projector.orthographicSize = currentZoneWallRadius;
         }
 
         /// <summary>
@@ -290,13 +306,15 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             targetShrunkenRadius = shrinkPhases[shrinkPhaseIndex].shrinkToRadius;  //use the ZoneRadiusFactor as a percentage
 
             //set next shrink time
-            nextShrinkTime = Time.time + shrinkPhases[shrinkPhaseIndex].secondsUntilShrinkBegins;
+            nextShrinkTime = Time.time 
+                + shrinkPhases[shrinkPhaseIndex].secondsUntilShrinkBegins;
                         
             //get a new centerpoint for the zone wall to shrink around
             ConfigureNewCenterPoint();
 
             //show on minimap where zone will shrink to
-            leadingCircle = CreateLeadingCircle(centerPoint, targetShrunkenRadius, originalZoneWallRadius, lineRendererSegments);
+            leadingCircle = CreateLeadingCircle(centerPoint, targetShrunkenRadius, 
+                originalZoneWallRadius, lineRendererSegments);
         }
 
         /// <summary>
@@ -305,25 +323,22 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private void HandleStopShrinking()
         {
             // MoveTowards will continue ad infinitum, so we must test that we have gotten CLOSE ENOUGH to be DONE
-            if (.5f > (currentZoneWallRadius - targetShrunkenRadius))//shrinking complete
+            if (0.5f > (currentZoneWallRadius - targetShrunkenRadius))//shrinking complete
             {
                 Destroy(leadingCircle);
 
                 shrinking = false;
-                if (DEBUG) Debug.Log("Zone Wall finished shrinking.");
+                if (DEBUG) Debug.Log("[ZoneWallManager] Finished shrinking.");
 
                 //is there more shrinking to do?
-                if (shrinkPhaseIndex  + 1 < shrinkPhases.Length)
+                if (++shrinkPhaseIndex < shrinkPhases.Length)
                 {
-                    //increment to next phase
-                    ++shrinkPhaseIndex;
-
                     //set timers, draw new circle... 
                     InitNextShrink();
                 }
                 else
                 {
-                    if (DEBUG) Debug.Log("Zone Wall will no longer shrink.");
+                    if (DEBUG) Debug.Log("[ZoneWallManager] Will no longer shrink.");
                     //turn off this behavior
                     this.enabled = false;
                 }
@@ -347,7 +362,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             int attemptCounter = 0;
             bool foundSuitable = false;
 
-            if (DEBUG) Debug.Log("Finding a new center point....");
+            if (DEBUG) Debug.Log("[ZoneWallManager] Finding a new center point....");
 
             while (!foundSuitable)
             {
@@ -369,9 +384,10 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 if (++attemptCounter > attemptsUntilFailure)
                 {
                     //build error message
-                    System.Text.StringBuilder stringBuilder = new System.Text.StringBuilder();
+                    StringBuilder stringBuilder = new StringBuilder();
 
-                    stringBuilder.Append("ERROR! New Center point could not be found after ");
+                    stringBuilder.Append("[ZoneWallManager] " +
+                        "New Center point could not be found after ");
                     stringBuilder.Append(attemptsUntilFailure);
                     stringBuilder.Append(" attempts.");
 
@@ -393,7 +409,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <param name="drawHeight">How high in space the points should be drawn</param>
         /// <param name="segments">How many segments should the circle be drawn using? 64 seems good; don't go too crazy.</param>
         /// <returns></returns>
-        private static GameObject CreateLeadingCircle(Vector3 circleCenterPoint, float radius, float drawHeight, int segments = 64)
+        private static GameObject CreateLeadingCircle(Vector3 circleCenterPoint, 
+            float radius, float drawHeight, int segments = 64)
         {
             //new empty game object
             var leadingCircle = new GameObject();
