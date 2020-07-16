@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6610861751294058199}
+  - component: {fileID: 6610861751294058196}
   - component: {fileID: 6610861751294058194}
   - component: {fileID: 6610861751294058197}
-  - component: {fileID: 6610861751294058196}
   m_Layer: 0
   m_Name: ZoneWall
   m_TagString: Untagged
@@ -34,6 +34,23 @@ Transform:
   m_Father: {fileID: 6610861751990787273}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6610861751294058196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6610861751294058198}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51bdf48d37f3fb74384d3fa60573bd85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  developerDescription: Handles placing and moving the Zone
+  lineRendererSegments: 64
+  safeZone_Circle_Projector: {fileID: 6610861752042598420}
+  shrinkPhaseOptions: {fileID: 11400000, guid: 3eb4cdd1ccc1dc244b53a4edc0d1d9fa, type: 2}
+  DEBUG: 0
 --- !u!136 &6610861751294058194
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -145,23 +162,6 @@ LineRenderer:
     generateLightingData: 0
   m_UseWorldSpace: 1
   m_Loop: 1
---- !u!114 &6610861751294058196
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6610861751294058198}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51bdf48d37f3fb74384d3fa60573bd85, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  developerDescription: Enter a description.
-  lineRendererSegments: 64
-  safeZone_Circle_Projector: {fileID: 6610861752042598420}
-  shrinkPhaseOptions: {fileID: 11400000, guid: 3eb4cdd1ccc1dc244b53a4edc0d1d9fa, type: 2}
-  DEBUG: 0
 --- !u!1 &6610861751435574470
 GameObject:
   m_ObjectHideFlags: 0
