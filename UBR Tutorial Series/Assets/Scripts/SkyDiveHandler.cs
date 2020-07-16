@@ -207,7 +207,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //Debug.Log("StartLanded()");
             //camera zoom stuff
             zoomStartTime = Time.time;//reset zoom timer
-            zoomLength = Vector3.Distance(Camera.main.transform.localPosition, cameraPositionBeforeZoom);
+            zoomLength = Vector3.Distance(
+                Camera.main.transform.localPosition, cameraPositionBeforeZoom);
 
             Parachute.DestroyParachute();//parachute class handles destroying itself (playing anims, whatever)
             playerController.TogglePlayerControls(true);
@@ -307,18 +308,22 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             m_CharacterTargetRot *= Quaternion.Euler(0f, characterRotationY, 0f);//yaw
                                                                                  //only roll when freefalling, not when 'chute deployed
-            if (skyDivingState == SkyDivingStateENUM.freeFalling) m_CharacterRollTargetRot *= Quaternion.Euler(0f, 0f, -characterRotationZ);//roll
+            if (skyDivingState == SkyDivingStateENUM.freeFalling)
+                m_CharacterRollTargetRot *= Quaternion.Euler(0f, 0f, -characterRotationZ);//roll
 
             m_CameraTargetRot *= Quaternion.Euler(-cameraRotationX, 0f, 0f);//camera pitch
 
             //CLAMP 'EM ALL!
             if (clampVerticalRotation)
             {
-                m_CameraTargetRot = BRS_Utility.ClampRotationAroundXAxis(m_CameraTargetRot, cameraMinPitch, cameraMaxPitch);
+                m_CameraTargetRot = BRS_Utility.ClampRotationAroundXAxis(
+                    m_CameraTargetRot, cameraMinPitch, cameraMaxPitch);
             }
 
-            m_CharacterSwoopTargetRot = BRS_Utility.ClampRotationAroundXAxis(m_CharacterSwoopTargetRot, 0, maxSwoopAngle);
-            m_CharacterRollTargetRot = BRS_Utility.ClampRotationAroundZAxis(m_CharacterRollTargetRot, minRollRotation, maxRollRotation);
+            m_CharacterSwoopTargetRot = BRS_Utility.ClampRotationAroundXAxis(
+                m_CharacterSwoopTargetRot, 0, maxSwoopAngle);
+            m_CharacterRollTargetRot = BRS_Utility.ClampRotationAroundZAxis(
+                m_CharacterRollTargetRot, minRollRotation, maxRollRotation);
         }
 
         /// <summary>
@@ -484,7 +489,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                     StartLanded();
                     break;
                 case SkyDivingStateENUM.landed:
-
+                    //stick the landing
+                    cameraPivotTransform.LookAt(cameraPivotTransform.forward, Vector3.up);
+                    break;
                 default:
                     break;
             }
