@@ -7,8 +7,15 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 {
     [RequireComponent(typeof(CapsuleCollider))]
     [RequireComponent(typeof(LineRenderer))]
+    [SelectionBase]
     public class BRS_ZoneWallManager : RichMonoBehaviour
     {
+        /// <summary>
+        /// Singleton pattern.
+        /// </summary>
+        public static BRS_ZoneWallManager Instance { get; private set; } // readonly externally
+        public static GameObject GameObject { get; private set; } // readonly externally
+
         [Header("---Zone Wall Manager---")]
         [Range(16, 360)]
         [Tooltip("How many segments should the circle that appears on the mimimap be? More segments means it looks crisper, but at cost of performance.")]
@@ -27,12 +34,10 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Tooltip("Scriptable Object containing options for shrink time, radius, damage.")]
         [SerializeField] private ShrinkPhaseOptions shrinkPhaseOptions;
 
-        #region Private Variables
+        private ShrinkPhase CurrentShrinkPhase
+        { get => shrinkPhaseOptions.ShrinkPhases[shrinkPhaseIndex]; }
 
-        /// <summary>
-        /// Collection of options (shrink time, radius, damage data) for each phase. 
-        /// </summary>
-        private ShrinkPhase[] shrinkPhases;
+        #region Private Variables
 
         /// <summary>
         /// this can be set to PUBLIC in order to troubleshoot.  It will show a checkbox in the Inspector.
@@ -109,9 +114,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         protected override void Awake()
         {
             base.Awake();
-
-            //load options from scriptable object
-            shrinkPhases = shrinkPhaseOptions.shrinkPhases;
             
             //display linerenderer in space local to center of zone wall, not world
             lineRenderer.useWorldSpace = false;
@@ -125,6 +127,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             //move projector with circle
             safeZone_Circle_Projector.transform.position = new Vector3(0, capsuleCollider.height, 0);//make sure projector is at a good height
+
+            InitSingleton();
         }
 
         void Start()
@@ -158,18 +162,18 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             lineRenderer = gameObject.GetComponent<LineRenderer>();
         }
 
-        /// <summary>
-        /// Which shrink phase is the Zone Wall currently in?
-        /// </summary>
-        /// <returns>Shrink phase index.</returns>
-        public int GetShrinkPhase()
+        private void InitSingleton()
         {
-            return shrinkPhaseIndex;
-        }
-
-        public ShrinkPhase[] GetShrinkPhases()
-        {
-            return shrinkPhases;
+            if (!Instance)
+            {
+                Instance = this; // there can only be ONE!
+                GameObject = gameObject; // for easy access
+            }
+            else
+            {
+                Debug.LogError("[ZoneWallManager] Singleton failed. " +
+                    "Too many Objects in Scene!", this);
+            }
         }
 
         /// <summary>
@@ -182,12 +186,12 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             //each subsequent radius must be smaller than the first.
             var radius = startingZoneWallRadius;
-            for(var i = 0; i < shrinkPhases.Length; ++i)
+            for(var i = 0; i < shrinkPhaseOptions.ShrinkPhases.Length; ++i)
             {
-                var phase = shrinkPhases[i];
+                var phase = shrinkPhaseOptions.ShrinkPhases[i]; // cache
 
                 //check radius
-                if(phase.shrinkToRadius >= radius)
+                if(phase.ShrinkToRadius >= radius)
                 {
                     Debug.LogError("[ZoneWallManager] ShrinkPhases are not valid. " 
                         + "Check that radii are in descending order.", this);
@@ -195,14 +199,14 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 }
                 else
                 {
-                    radius = phase.shrinkToRadius;
+                    radius = phase.ShrinkToRadius;
                 }
 
                 //check shrink seconds to avoid divide by zero on bad input
-                if(phase.ticksPerSecond <= 0)
+                if(phase.TicksPerSecond <= 0)
                 {
                     Debug.LogError("[ZoneWallManager] Ticks per second must" +
-                        " be a positive integer! : " + phase.ticksPerSecond);
+                        " be a positive integer! : " + phase.TicksPerSecond);
                 }
             }
 
@@ -221,7 +225,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
                 //know when to stop shrinking
                 HandleStopShrinking();
-
             }
             
             //is it time to start shrinking?
@@ -273,24 +276,26 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         private void ShrinkEverything()
         {
+            var currentPhase = CurrentShrinkPhase; // cache
+
             // shrink the zone diameter, over time
             currentZoneWallRadius = Mathf.MoveTowards(currentZoneWallRadius, 
                 targetShrunkenRadius, 
-                (targetShrunkenRadius / shrinkPhases[shrinkPhaseIndex]
-                .secondsToFullyShrink) * Time.deltaTime);
+                (targetShrunkenRadius / currentPhase.SecondsToFullyShrink) //step ratio
+                * Time.deltaTime); // shrink rate
 
             var sizeRatio = currentZoneWallRadius / originalZoneWallRadius;
 
             //shrink the zoneWall object and all of its children
             ZoneWallXform.localScale = 
-                new Vector3(  sizeRatio, 1, sizeRatio); //set local scale of zone wall
+                new Vector3(sizeRatio, 1, sizeRatio); //set local scale of zone wall
 
             //move ZoneWall towards new centerpoint
             ZoneWallXform.position = Vector3.MoveTowards(
                 ZoneWallXform.position, //current position
-                new Vector3(centerPoint.x, ZoneWallXform.position.y, centerPoint.z), 
-                (distanceToMoveCenter / shrinkPhases[shrinkPhaseIndex]
-                .secondsToFullyShrink) * Time.deltaTime);
+                new Vector3(centerPoint.x, ZoneWallXform.position.y, centerPoint.z), //target position
+                (distanceToMoveCenter / currentPhase.SecondsToFullyShrink) // step ratio
+                * Time.deltaTime); // shrink rate
 
             // shrink circle projector
             if (safeZone_Circle_Projector)
@@ -302,12 +307,14 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         private void InitNextShrink()
         {
+            var phase = CurrentShrinkPhase; // cache 
+
             //this shrink phase, shrink from current radius to this smaller radius. 
-            targetShrunkenRadius = shrinkPhases[shrinkPhaseIndex].shrinkToRadius;  //use the ZoneRadiusFactor as a percentage
+            targetShrunkenRadius = phase.ShrinkToRadius;  //use the ZoneRadiusFactor as a percentage
 
             //set next shrink time
             nextShrinkTime = Time.time 
-                + shrinkPhases[shrinkPhaseIndex].secondsUntilShrinkBegins;
+                + phase.SecondsUntilShrinkBegins;
                         
             //get a new centerpoint for the zone wall to shrink around
             ConfigureNewCenterPoint();
@@ -331,7 +338,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 if (DEBUG) Debug.Log("[ZoneWallManager] Finished shrinking.");
 
                 //is there more shrinking to do?
-                if (++shrinkPhaseIndex < shrinkPhases.Length)
+                if (++shrinkPhaseIndex < shrinkPhaseOptions.ShrinkPhases.Length)
                 {
                     //set timers, draw new circle... 
                     InitNextShrink();
@@ -354,7 +361,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <param name="shrinkFactor"></param>
         /// <param name="DEBUG"></param>
         /// <returns></returns>
-        private static Vector3 FindNewCenterPoint(Vector3 currentCenter, float currentRadius, float newRadius, bool DEBUG = false)
+        private static Vector3 FindNewCenterPoint(Vector3 currentCenter, 
+            float currentRadius, float newRadius, bool DEBUG = false)
         {
             Vector3 newCenterPoint = Vector3.zero;
 
@@ -470,18 +478,33 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 arcLength += spaceBetweenPoints;
             }
         }
+
+        public static float GetDamagePerTick()
+        {
+            return Instance.CurrentShrinkPhase.DamagePerTick;
+        }
+
         /// <summary>
         /// Gets the height of the zone wall at which the line renderers are drawn.
         /// </summary>
         /// <returns></returns>
-        public float GetDrawHeight()
+        public static float GetDrawHeight()
         {
-            return capsuleCollider.height;
+            return Instance.capsuleCollider.height;
         }
 
-        public float GetCurrentRadius()
+        public static float GetCurrentRadius()
         {
-            return currentZoneWallRadius;
+            return Instance.currentZoneWallRadius;
+        }
+
+        /// <summary>
+        /// Damage is dealt every "tick".
+        /// </summary>
+        /// <returns></returns>
+        public static int GetTicksPerSecond()
+        {
+            return Instance.CurrentShrinkPhase.TicksPerSecond;
         }
     }
 }
