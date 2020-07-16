@@ -5,8 +5,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 {
     public class PlayerInPlaneController : RichMonoBehaviour
     {
-        //private Transform _XForm_Camera;
-        //private Transform _XForm_Parent;
         private Transform originalPivot;
         private Transform cameraPivot;//saved transform
         private Transform playerTransform;
@@ -15,7 +13,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private Vector3 cameraStartingPosition;
         private PlaneManager planeManager;
 
-        //private readonly float _CameraDistance = 10f;
         public float MouseSensitivity = 4.0f;
         private readonly float orbitDistance = -50;//must be negative!
                                                    //public float ScrollSensitivity = 2.0f;
@@ -26,11 +23,13 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         private bool isAllowedToJump = false;
 
-        //references to other components
+        //member Components
+        private Rigidbody myRigidbody;
+
+        //references to external Components
         private SkyDiveHandler skyDiveController;
         private BRS_TPCharacter playerCharacter;
         private BRS_TPController playerController;
-        private Rigidbody myRigidbody;
 
         private void Update()
         {
@@ -147,6 +146,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             InitCamera();
         }
 
+        /// <summary>
+        /// Plane has entered the drop zone
+        /// </summary>
         public void OnDropZoneEnter()
         {
             isAllowedToJump = true;//set flag so script will accept player input
@@ -154,6 +156,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //Debug.Log("GREEN LIGHT! GREEN LIGHT! GO GO GO! JUMP!");
         }
 
+        /// <summary>
+        /// In case the Player never pushes the button, kick 'em out!
+        /// </summary>
         public void ForceJump()
         {
             JumpFromPlane();
