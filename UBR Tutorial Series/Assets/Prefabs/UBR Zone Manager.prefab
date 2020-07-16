@@ -49,7 +49,7 @@ MonoBehaviour:
   developerDescription: Handles placing and moving the Zone
   lineRendererSegments: 64
   safeZone_Circle_Projector: {fileID: 6610861752042598420}
-  shrinkPhaseOptions: {fileID: 11400000, guid: 3eb4cdd1ccc1dc244b53a4edc0d1d9fa, type: 2}
+  shrinkPhaseOptions: {fileID: 11400000, guid: b1aac6d652c69e4489f9dc5840c5575f, type: 2}
   DEBUG: 0
 --- !u!136 &6610861751294058194
 CapsuleCollider:
