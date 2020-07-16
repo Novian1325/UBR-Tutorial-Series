@@ -34,9 +34,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private void Start()
         {
             //find it 
-            if (mainCameraXform == null) mainCameraXform = Camera.main.transform;
-            //if STILL null
-            if (mainCameraXform == null) Debug.LogError("ERROR! No GameObject tagged \"MainCamera\" in scene.");
+            if (mainCameraXform == null) mainCameraXform = 
+                    GameObject.FindGameObjectWithTag("MainCamera").transform;
 
             coroutine_CompassMarkerSort = StartCoroutine(SortCompassMarker(sortsPerSecond));
         }
@@ -60,37 +59,32 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 CompassDirectionText.text = headingAngle.ToString();
             }
 
-            Vector3 trackablePosition;
-            BRS_CompassMarker compassMarker;
-
             for (int i = 0; i < compassMarkerList.Count; ++i)
             {
-                compassMarker = compassMarkerList[i];
-                if (!compassMarker.GetTrackableTransform()) Debug.LogError("ERROR! NO MARKER HERE");
-                trackablePosition = compassMarker.GetTrackableTransform().position;
+                var compassMarker = compassMarkerList[i]; // get cached marker
+                var trackablePosition = compassMarker.GetTrackableTransform().position; // get target position
+                var distance = Vector3.Distance(mainCameraXform.position, trackablePosition); // get distance
 
-                //get and save the distance to player
-                var distance = Vector3.Distance(mainCameraXform.position, trackablePosition);
                 compassMarker.SetDistanceFromPlayer(distance);
 
+                //check if Player is close enough to marker to be revealed
                 if (distance <= compassMarker.GetRevealDistance())
                 {
+                    //update uv rect on compass to reflect angle to player
+                    UpdateCompassMarker(compassMarker, trackablePosition, mainCameraXform);
+
                     //enable it if it is not already so
                     if (!compassMarker.isActiveAndEnabled)
                     {
                         compassMarker.gameObject.SetActive(true);
                     }
 
-                    //update uv rect on compass to reflect angle to player
-                    UpdateCompassMarker(compassMarker, trackablePosition, mainCameraXform);
-
                 }
-                else
+                else // too far away
                 {
                     compassMarker.gameObject.SetActive(false);
                 }
             }
-
         }
 
         private void OnEnable()
@@ -144,10 +138,13 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <returns></returns>
         private IEnumerator SortCompassMarker(float sortsPerSecond = 1)
         {
+            var sortDelay = new WaitForSeconds(1 / sortsPerSecond); // create and re-use
+
             while (true)
             {
                 if (compassMarkerList.Count > 1)
                 {
+                    //LINQ is not very performant, especially in a repeating function. Use SelectionSort instead
                     //order icons so closest object to player is on top of all other icons
                     compassMarkerList = compassMarkerList.OrderBy(o => o.GetDistanceFromPlayer()).ToList();
 
@@ -157,7 +154,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                     }
                 }
 
-                yield return new WaitForSecondsRealtime(1 / sortsPerSecond);
+                yield return sortDelay;
             }
         }
 
@@ -174,7 +171,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             }
 
             //create new marker
-            var compassMarker = Instantiate(compassMarkerPrefab, CompassImage.transform).GetComponent<BRS_CompassMarker>() as BRS_CompassMarker;
+            var compassMarker = Instantiate(compassMarkerPrefab, CompassImage.transform)
+                .GetComponent<BRS_CompassMarker>() as BRS_CompassMarker;
 
             //initialize marker with image, color, and distance
             compassMarker.InitCompassMarker(newTrackable);
