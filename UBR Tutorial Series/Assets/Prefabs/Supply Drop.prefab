@@ -167,10 +167,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4572313994018349609}
-  - component: {fileID: 4572313994018349610}
-  - component: {fileID: 4572313994018349611}
   - component: {fileID: 4572313994018349612}
   - component: {fileID: 4572313994018349608}
+  - component: {fileID: 4572313994018349611}
+  - component: {fileID: 4572313994018349610}
   m_Layer: 0
   m_Name: Supply Drop
   m_TagString: Untagged
@@ -197,35 +197,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!54 &4572313994018349610
-Rigidbody:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4572313994018349613}
-  serializedVersion: 2
-  m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
-  m_UseGravity: 1
-  m_IsKinematic: 0
-  m_Interpolate: 0
-  m_Constraints: 0
-  m_CollisionDetection: 0
---- !u!65 &4572313994018349611
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4572313994018349613}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 125, y: 125, z: 125}
-  m_Center: {x: 0, y: 60, z: 0}
 --- !u!114 &4572313994018349612
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -238,7 +209,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b511254aecef9e9448afc50663107652, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  developerDescription: Enter a description.
+  developerDescription: Falls from the sky with goodies for the Players to fight
+    over.
   toolTipObject: {fileID: 0}
   freefallingState: 1
   terminalVelocity: -18
@@ -261,10 +233,39 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a87ebc02bf85d4e906b9e32315ddaa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  developerDescription: Enter a description.
-  compassImage: {fileID: 0}
+  developerDescription: Tracks itself on minimap
+  compassImage: {fileID: 2800000, guid: b0fe1c764f0725444ab37125d3fc639c, type: 3}
   revealDistance: 500
   iconColor: {r: 0.53671, g: 1, b: 0, a: 0}
+--- !u!65 &4572313994018349611
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4572313994018349613}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 125, y: 125, z: 125}
+  m_Center: {x: 0, y: 60, z: 0}
+--- !u!54 &4572313994018349610
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4572313994018349613}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &5711474416355629487
 GameObject:
   m_ObjectHideFlags: 0
@@ -432,9 +433,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6387046114266130413}
+  - component: {fileID: 7118778946069384012}
   - component: {fileID: 1671486443765473799}
   - component: {fileID: 8309297132305862455}
-  - component: {fileID: 7118778946069384012}
+  - component: {fileID: 5665251565232091174}
   m_Layer: 0
   m_Name: BRS_AirDrop_Parachute
   m_TagString: Untagged
@@ -456,6 +458,19 @@ Transform:
   m_Father: {fileID: 4572313994018349609}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7118778946069384012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7118778946069384013}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ca118e5ad500d4448db45ad6e41bb52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  developerDescription: 'Opens '
 --- !u!33 &1671486443765473799
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -503,16 +518,22 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &7118778946069384012
-MonoBehaviour:
+--- !u!95 &5665251565232091174
+Animator:
+  serializedVersion: 3
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7118778946069384013}
   m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7ca118e5ad500d4448db45ad6e41bb52, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  developerDescription: Enter a description.
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 95aeb41fbd5093c48baaa8a6a344f865, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
