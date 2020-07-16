@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <seealso cref="BRS_PlanePathManagerInspector"/>
     public class BRS_PlanePathManager : RichMonoBehaviour
     {
         //visible to Inspector
@@ -417,6 +421,26 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 //Debug.LogError("ERROR! Raycast missed it's target: " + targetObject);
             }
             return raycastHitEndpoint;
+        }
+
+        [ContextMenu("Show Drop Zones")]
+        public void ShowDropZoneRenderers()
+        {
+            var renderers = GetComponentsInChildren<Renderer>();
+            foreach (var renderer in renderers)
+            {
+                renderer.enabled = true;
+            }
+        }
+
+        [ContextMenu("Hide Drop Zones")]
+        public void HideDropZoneRenderers()
+        {
+            var renderers = GetComponentsInChildren<Renderer>();
+            foreach(var renderer in renderers)
+            {
+                renderer.enabled = false;
+            }
         }
     }
 }
