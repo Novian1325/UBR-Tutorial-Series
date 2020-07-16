@@ -70,19 +70,19 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             if (planeSpawnBounds == null)
             {
-                Debug.LogError("ERROR: plane spawn bounds not set!");
+                Debug.LogError("ERROR: plane spawn bounds not set!", this);
                 allReferencesOkay = false;
             }
 
             if (playerDropZones.Length < 1)
             {
-                Debug.LogError("ERROR: No Player Drop Zones in list!");
+                Debug.LogError("ERROR: No Player Drop Zones in list!", this);
                 allReferencesOkay = false;
             }
 
             if (supplyDropZones.Length < 1)
             {
-                Debug.LogError("ERROR: No Supply Drop Zones in list!");
+                Debug.LogError("ERROR: No Supply Drop Zones in list!", this);
                 allReferencesOkay = false;
             }
 
@@ -92,7 +92,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         void Start()
         {
             //set and check altitude
-            planeFlightAltitude = planeSpawnBounds.position.y > 0 ? planeSpawnBounds.position.y : 200f;//verifies that altitude is above 0
+            planeFlightAltitude = planeSpawnBounds.position.y > 0 
+                ? planeSpawnBounds.position.y : 200f;//verifies that altitude is above 0
             startingFlightAltitude = planeFlightAltitude;//set starting value
 
             //set radius of spawnBoundsCircleRadius
@@ -102,11 +103,11 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //error checking
             if (VerifyReferences())
             {
-                if (DEBUG) Debug.Log("Everything looks good here.");
+                if (DEBUG) Debug.Log("Everything looks good here.", this);
             }
             else
             {
-                Debug.Log("Failed to set up references.");
+                Debug.Log("Failed to set up references.", this);
             }
 
             //make sure drop zones are the proper height
@@ -156,7 +157,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         {
             acceptableDropZones = planeContainsPlayers ? playerDropZones : playerDropZones;
             planeFlightSpeed = planeContainsPlayers ? planeSpeed_PlayerDrop : planeSpeed_SupplyDrop;
-
         }
 
         /// <summary>
@@ -173,7 +173,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 (Mathf.Sin(randomArc) * spawnBoundsCircleRadius) + planeSpawnBounds.position.z);//get y coordinate on unity circle, multiply by radius, offset relative to bounds
                                                                                                 //Debug.Log("random point: " + randomPoint);
             return randomPoint;
-
         }
 
         /// <summary>
@@ -182,7 +181,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <param name="cargo"></param>
         private void LoadCargo(GameObject cargo)
         {
-
             if (cargo.CompareTag("Player"))
             {
                 cargo_Players.Add(cargo);
@@ -192,7 +190,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             {
                 cargo_Supplies = cargo;//set supplies
             }
-
 
         }
 
@@ -231,7 +228,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <returns></returns>
         public bool InitPlaneDrop(GameObject[] incomingCargo)
         {
-            Debug.Log("Trying to be in the plane.");
+            if (DEBUG)
+                Debug.Log("Trying to be in the plane.", this);
+
             foreach (var cargo in incomingCargo)
             {
                 LoadCargo(cargo);
@@ -252,14 +251,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             //find a start point
             planeStartPoint = GetRandomPointOnCircle();
-            //spawn debugger object. this object is the parent, so both will be destroyed
-            if (DEBUG)
-            {
-                var stringBuilder = new System.Text.StringBuilder();
-                stringBuilder.Append("StartMarker: ");
-                stringBuilder.Append(unsuccessfulPasses);
-
-            }
 
             //look for an endpoint
             for (var endPointsFound = 1; endPointsFound <= flightPathChecksUntilFailure; ++endPointsFound)//while you don't have a valid flight path...
@@ -279,7 +270,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 }
                 else
                 {
-                    if (DEBUG) Debug.Log("INVALID: Flight path not through LZ.");
+                    if (DEBUG) Debug.Log("INVALID: Flight path not through LZ.", this);
                 }
 
                 //test if flight path is clear all the way to endpoint
@@ -289,7 +280,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 }
                 else
                 {
-                    if (DEBUG) Debug.Log("INVALID: Endpoint Marker Not Hit.");
+                    if (DEBUG) Debug.Log("INVALID: Endpoint Marker Not Hit.", this);
                 }
 
                 //disable marker
@@ -301,30 +292,33 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                     //SUCCESS!!!!!!! 
                     //reset variables for next path
                     planeFlightAltitude = startingFlightAltitude;//reset altitude for next try
-                    unsuccessfulPasses = 0;//reset failures
                     planeContainsPlayers = false;//prove me right
+                    unsuccessfulPasses = 0; // track to prevent infinite loops
                     return true;
                 }
                 else
                 {
                     if (DEBUG)
                     {
-                        if (!endpointHit) Debug.Log("Flight path failed because ENDPOINT NOT HIT.");
-                        if (!flightPathThroughLZ) Debug.Log("Flight path failed because NOT THROUGH LZ.");
-                        Debug.Log(".................New test.......................");
+                        if (!endpointHit)
+                            Debug.Log("Flight path failed because ENDPOINT NOT HIT.", this);
+
+                        if (!flightPathThroughLZ)
+                            Debug.Log("Flight path failed because NOT THROUGH LZ.", this);
+                        Debug.Log(".................New test.......................", this);
                     }
                     endpointHit = false;
                     flightPathThroughLZ = false;
                 }
-
 
             }//end for
 
             //this altitude is not working. keep raising
             if (++unsuccessfulPasses > flightPathChecksUntilFailure)//we've been here before
             {
-                Debug.LogWarning("ERROR! Flight path failed after " + unsuccessfulPasses * flightPathChecksUntilFailure + " attempts. Adjust planeSpawnBounds. Skipping Plane Deployment");
-                unsuccessfulPasses = 0;//reset tracker
+                Debug.LogWarning("ERROR! Flight path failed after " 
+                    + unsuccessfulPasses * flightPathChecksUntilFailure 
+                    + " attempts. Adjust planeSpawnBounds. Skipping Plane Deployment", this);
                 return false;
             }
             //raise altitude and try again
@@ -342,7 +336,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         public PlaneManager SpawnPlane()
         {
             //create this plane in the world at this position, with no rotation
-            var plane = Instantiate(BRS_PlaneSpawn, planeStartPoint, Quaternion.identity) as GameObject;//do not set plane to be child of this object!
+            var plane = Instantiate(BRS_PlaneSpawn, planeStartPoint, 
+                Quaternion.identity) as GameObject;//do not set plane to be child of this object!
             plane.transform.LookAt(planeEndPoint);//point plane towards endpoint
 
             //get plane manager
@@ -353,7 +348,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             }
 
             //init plane
-            planeManager.InitPlane(targetDropZone, cargo_Players.ToArray(), cargo_Supplies, planeFlightSpeed);
+            planeManager.InitPlane(targetDropZone, cargo_Players.ToArray(), 
+                cargo_Supplies, planeFlightSpeed);
             cargo_Players.Clear();
             return planeManager;
 
@@ -375,7 +371,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //raycast
             if (Physics.Raycast(startPoint, targetObject - startPoint, out raycastHitInfo, spawnBoundsCircleRadius * 2))
             {
-                if (DEBUG) Debug.Log("Testing Raycast Through DropZone. Hit: " + raycastHitInfo.collider.gameObject.name);
+                if (DEBUG) Debug.Log("Testing Raycast Through DropZone. Hit: " 
+                    + raycastHitInfo.collider.gameObject.name, this);
                 for (var i = 0; i < acceptableDropZones.Length; ++i)//look through each drop zone in list
                 {
                     if (raycastHitInfo.collider.gameObject == acceptableDropZones[i])//if the game object that was hit is inside this list of good zones
@@ -410,7 +407,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //if something was hit...
             if (Physics.Raycast(startPoint, targetObject.transform.position - startPoint, out raycastHitInfo, spawnBoundsCircleRadius * 2, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
             {
-                if (DEBUG) Debug.Log("Testing Raycast against Endpoint. Hit: " + raycastHitInfo.collider.gameObject.name);
+                if (DEBUG) Debug.Log("Testing Raycast against Endpoint. Hit: " 
+                    + raycastHitInfo.collider.gameObject.name, this);
                 //set bool to whether the object ray hit is same as target
                 raycastHitEndpoint = raycastHitInfo.collider.gameObject == targetObject;
             }
