@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+[System.Obsolete("Deprecated. Monobehaviours should not have constructors. This functionality has been added to ")]
 class WorldCircle: MonoBehaviour
 {
 	//private members
