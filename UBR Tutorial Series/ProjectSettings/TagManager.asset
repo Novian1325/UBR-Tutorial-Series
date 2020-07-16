@@ -6,6 +6,7 @@ TagManager:
   tags:
   - MapBounds
   - Terrain
+  - ZoneWall
   layers:
   - Default
   - TransparentFX
