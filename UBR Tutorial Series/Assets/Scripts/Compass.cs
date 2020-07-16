@@ -298,7 +298,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //do nothing if no Compass in Scene
             if (!singletonInstance)
             {
-                Debug.Log("[Compass] No Compass in Scene.");
                 return;
             }
 
