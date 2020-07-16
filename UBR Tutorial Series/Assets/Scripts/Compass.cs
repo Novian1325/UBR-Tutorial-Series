@@ -187,7 +187,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// Removes trackable from the compass.
         /// </summary>
         /// <param name="trackable">trackable to remove</param>
-        public void RemoveTrackable(BRS_Trackable trackable)
+        public void UnregisterTrackable(BRS_Trackable trackable)
         {
             for (var i = 0; i < compassMarkerList.Count; ++i)
             {

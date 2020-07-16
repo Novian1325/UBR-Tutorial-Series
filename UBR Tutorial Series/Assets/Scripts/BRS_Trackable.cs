@@ -4,7 +4,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 {
     public class BRS_Trackable : RichMonoBehaviour
     {
-
         [SerializeField] private Texture compassImage;
         [SerializeField] private float revealDistance;
         [SerializeField] private Color iconColor;
@@ -31,7 +30,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         public void RemoveTrackable()
         {
-            compassInstance.RemoveTrackable(this);
+            compassInstance.UnregisterTrackable(this);
         }
 
         /// <summary>
@@ -55,27 +54,27 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         private void OnDisable()
         {
-           if(compassInstance) compassInstance.RemoveTrackable(this);
+           if(compassInstance) compassInstance.UnregisterTrackable(this);
         }
 
         private void OnDestroy()
         {
-            if (compassInstance) compassInstance.RemoveTrackable(this);
+            if (compassInstance) compassInstance.UnregisterTrackable(this);
         }
 
         public Texture GetCompassImage()
         {
-            return this.compassImage;
+            return this.compassImage; // readonly
         }
 
         public float GetRevealDistance()
         {
-            return this.revealDistance;
+            return this.revealDistance; // readonly
         }
 
         public Color GetIconColor()
         {
-            return this.iconColor;
+            return this.iconColor; // readonly
         }
 
         /// <summary>
@@ -86,7 +85,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         {
             this.iconColor = newColor;
             //update color of trackable
-            compassInstance.RemoveTrackable(this);
+            compassInstance.UnregisterTrackable(this);
             compassInstance.RegisterTrackable(this);
         }
 
