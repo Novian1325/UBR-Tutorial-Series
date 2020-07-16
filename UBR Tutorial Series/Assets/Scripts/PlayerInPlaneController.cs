@@ -30,14 +30,38 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private SkyDiveHandler skyDiveController;
         private BRS_TPCharacter playerCharacter;
         private BRS_TPController playerController;
-        private Rigidbody rb;
+        private Rigidbody myRigidbody;
 
         private void Update()
         {
+            //look for player input
             if (CrossPlatformInputManager.GetButton("Jump") && isAllowedToJump)
             {
                 //JUMP!
                 JumpFromPlane();
+            }
+        }
+
+        private void LateUpdate()
+        {
+            //move camera
+            if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0)
+            {
+                _LocalRotation.x += Input.GetAxis("Mouse X") * MouseSensitivity;
+                _LocalRotation.y -= Input.GetAxis("Mouse Y") * MouseSensitivity;
+
+                _LocalRotation.y = Mathf.Clamp(_LocalRotation.y, -30f, 90f);
+
+                Quaternion cameraTargetRotation = 
+                    Quaternion.Euler(_LocalRotation.y, _LocalRotation.x, 0);
+                cameraPivot.rotation = 
+                    Quaternion.Lerp(cameraPivot.rotation, 
+                    cameraTargetRotation, Time.deltaTime * OrbitDampening);
+
+                //rotate the player to update minimap facing and show orientation to other players
+                Quaternion playerTargetRotation = Quaternion.Euler(0, _LocalRotation.x, 0);
+                playerTransform.rotation = Quaternion.Lerp(playerTransform.rotation, 
+                    playerTargetRotation, Time.deltaTime * OrbitDampening);
             }
         }
 
@@ -57,7 +81,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private void InitCamera()
         {
             //sets initial distances, rotations, and parents the camera to the plane's pivot point
-            Transform cameraTransform = GameObject.FindGameObjectWithTag("MainCamera").transform;//cache reference
+            var cameraTransform = GameObject.FindGameObjectWithTag("MainCamera")
+                .transform;//cache reference
 
             originalPivot = cameraTransform.parent.transform;//get your parent's transform and cache it for later
             cameraStartingPosition = cameraTransform.localPosition;//cache starting orientation to player 
@@ -69,7 +94,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         
         private void JumpFromPlane()
         {
-            Transform camTrans = GameObject.FindGameObjectWithTag("MainCamera").transform;
+            var camTrans = GameObject.FindGameObjectWithTag("MainCamera")
+                .transform;
 
             planeManager.OnPlayerJump(this);//tell the plane that this player has left
             ShowJumpPrompt(false);//disable tooltip UI
@@ -78,10 +104,10 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             //handle player stuff
             playerTransform.SetParent(originalParent);
-            playerTransform.position = planeManager.GetDropSpot().position; // set player to appear at planes location from wherever they were
+            playerTransform.position = planeManager.GetDropSpot(); // set player to appear at planes location from wherever they were
             playerTransform.rotation = camTrans.rotation;//player faces the same direction camera was facing when in plane
-            rb.isKinematic = false;//body will now be controlled by physics forces
-            rb.useGravity = true;//turn gravity back on for player
+            myRigidbody.isKinematic = false;//body will now be controlled by physics forces
+            myRigidbody.useGravity = true;//turn gravity back on for player
             playerCharacter.ShowPlayerModel(true);//make the player visible again
 
             //playerController.TogglePlayerControls(true);//normal control does not resume until after skydiving
@@ -90,24 +116,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             camTrans.localPosition = cameraStartingPosition;//reset
             camTrans.localRotation = Quaternion.identity;//set rotation to neutral relative to parent
             Destroy(this);//remove this component  //this.enabled = false; //maybe even Destroy(this);
-        }
-
-        private void LateUpdate()
-        {
-            if (Input.GetAxis("Mouse X") != 0 || Input.GetAxis("Mouse Y") != 0)
-            {
-                _LocalRotation.x += Input.GetAxis("Mouse X") * MouseSensitivity;
-                _LocalRotation.y -= Input.GetAxis("Mouse Y") * MouseSensitivity;
-
-                _LocalRotation.y = Mathf.Clamp(_LocalRotation.y, -30f, 90f);
-
-                Quaternion cameraTargetRotation = Quaternion.Euler(_LocalRotation.y, _LocalRotation.x, 0);
-                cameraPivot.rotation = Quaternion.Lerp(cameraPivot.rotation, cameraTargetRotation, Time.deltaTime * OrbitDampening);
-
-                //rotate the player to update minimap facing and show orientation to other players
-                Quaternion playerTargetRotation = Quaternion.Euler(0, _LocalRotation.x, 0);
-                playerTransform.rotation = Quaternion.Lerp(playerTransform.rotation, playerTargetRotation, Time.deltaTime * OrbitDampening);
-            }
         }
 
         public void OnEnterPlane(PlaneManager planeMan)
@@ -121,7 +129,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             this.playerController = GetComponent<BRS_TPController>();
             this.playerTransform = this.transform;
             this.originalParent = this.transform.parent;//player will be parented to plane, and then re-parented back here
-            this.rb = GetComponent<Rigidbody>();
+            this.myRigidbody = GetComponent<Rigidbody>();
             this.enabled = true;//make sure it is turned on
 
             this.skyDiveController.enabled = false;//disable it, as we are not yet skydiving
@@ -132,8 +140,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             playerTransform.SetParent(planeManager.transform);//set as child to easily handle movement
             playerTransform.localPosition = Vector3.zero;//origin relative to parent
-            rb.isKinematic = true;//body will now be moved by the plane (using translation) and not by physical forces
-            rb.useGravity = false; //turn off gravity so player doesn't fall out of the sky
+            myRigidbody.isKinematic = true;//body will now be moved by the plane (using translation) and not by physical forces
+            myRigidbody.useGravity = false; //turn off gravity so player doesn't fall out of the sky
 
             //init camera
             InitCamera();

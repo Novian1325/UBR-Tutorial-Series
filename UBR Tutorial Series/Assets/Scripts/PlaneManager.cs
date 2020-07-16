@@ -34,9 +34,16 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             return playerIsOnBoard;
         }
 
-        public Transform GetDropSpot()
+        /// <summary>
+        /// Get the point in space the Player should fall out of the plane from.
+        /// </summary>
+        /// <returns></returns>
+        public Vector3 GetDropSpot()
         {
-            return dropSpot;
+            if (dropSpot)
+                return dropSpot.position;
+            else
+                return transform.position;
         }
 
         //this is basically the constructor class
