@@ -1,17 +1,16 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
     public class GameManager : RichMonoBehaviour
     {
+        /// <summary>
+        /// Where the Players are when the game starts.
+        /// </summary>
         [Header("GameSettings")]
-        [Tooltip("Enable to have the Players start in the airplane. Disable to allow them to start on ground.")]
-        [SerializeField] private bool startInPlane = false;
+        [Tooltip("Where should the Players be when the game starts?")]
+        [SerializeField] private DeployPlayersMode deployPlayersMode = DeployPlayersMode.OnGround;
 
-        [Tooltip("Enable to have the Players start in the skydiving state up in the air.")]
-        [SerializeField] private bool startSkyDiving = false;
         [Tooltip("Players in the game. If not a single player is found, a search will be done for all objects tagged \"Player\" in scene.")]
         [SerializeField] private GameObject[] players;
 
@@ -20,6 +19,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         [Header("SkyDiving")]
         [SerializeField] private SkyDiveHandler skyDiveController;
+
         [Tooltip("This is the height the Player will start at if \"startSkyDiving\" is true.")]
         [SerializeField] private int skyDiveTestHeight = 500;
 
@@ -32,26 +32,25 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //determine mission
             //spawn certain enemies and specific locations
 
+            InitPlayerStartMode();
         }
 
-        // Update is called once per frame
-        void Update()
+        private void InitPlayerStartMode()
         {
-            if (startInPlane)
+            switch (deployPlayersMode)
             {
-                startInPlane = false;//immediately set flag to false
-                DeployPlayersInPlane();
-            }
+                case DeployPlayersMode.InPlane:
+                    DeployPlayersInPlane();
+                    break;
+                case DeployPlayersMode.OnGround:
+                    break;
+                case DeployPlayersMode.Skydiving:
+                    if (skyDiveController.transform.position.y < skyDiveTestHeight)
+                        skyDiveController.transform.position = new Vector3(skyDiveController.transform.position.x,
+                            skyDiveTestHeight, skyDiveController.transform.position.z);
 
-            else if (startSkyDiving)
-            {
-                startSkyDiving = false;
-                //if you're lower than 100 feet, raise it up to a default value
-                if (skyDiveController.transform.position.y < skyDiveTestHeight)
-                    skyDiveController.transform.position = new Vector3(skyDiveController.transform.position.x,
-                        skyDiveTestHeight, skyDiveController.transform.position.z);
-
-                skyDiveController.BeginSkyDive();
+                    skyDiveController.BeginSkyDive();
+                    break;
             }
         }
 
