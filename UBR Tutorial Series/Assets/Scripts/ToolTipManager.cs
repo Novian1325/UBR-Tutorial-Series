@@ -18,13 +18,34 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         private static GameObject DeployParachutePrompt { get => Instance.deployParachutePrompt; }
 
-        private List<GameObject> toolTips = new List<GameObject>();
+        [SerializeField] private GameObject interactToolTip;
+
+        private static GameObject InteractPrompt { get => Instance.interactToolTip; }
+
+        //containers for keys and objects
+        private static Dictionary<ToolTipENUM, GameObject> toolTips = new Dictionary<ToolTipENUM, GameObject>();
+        private static List<ToolTipENUM> toolTipKeys = new List<ToolTipENUM>();
 
         private void InitToolTips()
         {
             //verify that each prompt exists. If it does, add it to the list for tracking
-            if (skydivePrompt) toolTips.Add(skydivePrompt);
-            if (deployParachutePrompt) toolTips.Add(deployParachutePrompt);
+            if (interactToolTip)
+            {
+                toolTips.Add(ToolTipENUM.INTERACT, skydivePrompt); // track object
+                toolTipKeys.Add(ToolTipENUM.INTERACT); // track key
+            }
+
+            if (skydivePrompt)
+            {
+                toolTips.Add(ToolTipENUM.SKYDIVE, skydivePrompt); // track object
+                toolTipKeys.Add(ToolTipENUM.SKYDIVE); // track key
+            }
+
+            if (deployParachutePrompt)
+            {
+                toolTips.Add(ToolTipENUM.DEPLOYPARACHUTE, deployParachutePrompt); // track object
+                toolTipKeys.Add(ToolTipENUM.DEPLOYPARACHUTE); // track key
+            }
         }
 
         protected override void Awake()
@@ -41,41 +62,43 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             DisableAllToolTips();
         }
         
-        private static void SingletonPattern(ToolTipManager TTM_instance)
+        private static void SingletonPattern(ToolTipManager instance)
         {
             if (!Instance)
             {
-                Instance = TTM_instance;
+                Instance = instance;
             }
             else
             {
-                Destroy(TTM_instance.gameObject);
+                Destroy(instance.gameObject);
             }
         }
 
         public void DisableAllToolTips()
         {
+            //iterating through a dictionary sucks, so iterate through a list of keys
             for (var i = 0; i < toolTips.Count; ++i)
             {
-                var tip = toolTips[i];
-                tip.SetActive(false);
+                var key = toolTipKeys[i]; // get key to get from dictionary
+
+                var tip = toolTips[key]; // get tip object out of dictionary
+
+                tip.SetActive(false); // hide it
             }
         }
 
-        public static void ShowToolTip(ToolTipENUM toolTip, bool active)
+        public static void ShowToolTip(ToolTipENUM toolTipKey, bool active)
         {
-            switch (toolTip)
+            GameObject tip;
+
+            if(toolTips.TryGetValue(toolTipKey, out tip))
             {
-                case ToolTipENUM.DEPLOYPARACHUTE:
-                    if (DeployParachutePrompt) DeployParachutePrompt.SetActive(active);
-                    break;
-
-                case ToolTipENUM.SKYDIVE:
-                    if (SkyDivePrompt) SkyDivePrompt.SetActive(active);
-                    break;
-
-                default:
-                    break;
+                tip.SetActive(active);
+            }
+            else
+            {
+                Debug.LogError("[ToolTipManager] Key not in dictionary: " 
+                    + toolTipKey.ToString());
             }
         }
     }
