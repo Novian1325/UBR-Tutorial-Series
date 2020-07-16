@@ -1,18 +1,20 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
-using System.Collections;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
+    [RequireComponent(typeof(RawImage))]
     public class BRS_CompassMarker : RichMonoBehaviour
     {
-
+        [Header("---Compass Marker---")]
         [Tooltip("Integrated. Optional.")]
-        [SerializeField] private TextMeshProUGUI TMP_distanceText;
+        [SerializeField] private TextMeshProUGUI distanceTMP;
+
         private RawImage compassMarkerImage;
         private BRS_Trackable trackable;
-        private float distanceFromPlayer;
+        private float distanceFromPlayer; // updated through SetDistanceToPlayer()
 
         //coroutine trackers
         private Coroutine coroutine_updateDistanceText;//track to enable pausing game
@@ -21,18 +23,12 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         protected override void GatherReferences()
         {
             base.GatherReferences();
-            if (!compassMarkerImage)
-            {
-                compassMarkerImage = gameObject.GetComponent<RawImage>() as RawImage;
-            }
+            compassMarkerImage = gameObject.GetComponent<RawImage>() as RawImage;
         }
 
         private void Start()
         {
-            if (TMP_distanceText)
-            {
-                coroutine_updateDistanceText = StartCoroutine(UpdateDistanceText());
-            }
+            ResumeUpdatingDistance();
         }
 
         private void OnEnable()
@@ -51,20 +47,13 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <param name="trackable">Associated trackable object this is paired with.</param>
         public void InitCompassMarker(BRS_Trackable trackable)
         {
-            this.trackable = trackable;
-            compassMarkerImage.texture = trackable.GetCompassImage();
-            compassMarkerImage.color = trackable.GetIconColor();
+            this.trackable = trackable; // cache
+
+            //update visuals
+            UpdateColor();
+            UpdateIcon();
         }
 
-        /// <summary>
-        /// Controls how often updates to the UI text are made.
-        /// </summary>
-        /// <returns></returns>
-        private IEnumerator UpdateDistanceText()
-        {
-            yield return new WaitForSecondsRealtime(1 / textUpdatesPerSecond);
-            TMP_distanceText.text = distanceFromPlayer.ToString();
-        }
 
         /// <summary>
         /// Stops coroutine associated with distance polling. Useful if game is paused.
@@ -80,20 +69,20 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         public void ResumeUpdatingDistance()
         {
             //
-            if (coroutine_updateDistanceText == null && TMP_distanceText)
+            if (coroutine_updateDistanceText == null && distanceTMP)
             {
                 coroutine_updateDistanceText = StartCoroutine(UpdateDistanceText());
             }
         }
         
-        public RawImage GetCompassMarkerImage()
-        {
-            return this.compassMarkerImage;
-        }
-
         public bool CompareTrackable(BRS_Trackable otherTrackable)
         {
             return otherTrackable == trackable;
+        }
+
+        public RawImage GetCompassMarkerImage()
+        {
+            return compassMarkerImage;
         }
 
         public float GetRevealDistance()
@@ -101,14 +90,19 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             return this.trackable.GetRevealDistance();
         }
 
-        public void SetDistanceFromPlayer(float distanceToPlayer)
+        public Transform GetTrackableTransform()
         {
-            this.distanceFromPlayer = distanceToPlayer;
+            return trackable.GetTrackableTransform();
         }
 
         public float GetDistanceFromPlayer()
         {
             return this.distanceFromPlayer;
+        }
+
+        public void SetDistanceFromPlayer(float distanceToPlayer)
+        {
+            this.distanceFromPlayer = distanceToPlayer;
         }
 
         public void UpdateColor()
@@ -118,12 +112,22 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         public void UpdateIcon()
         {
-            compassMarkerImage.texture = trackable.GetCompassImage();
+            compassMarkerImage.texture = trackable.GetCompassIcon();
         }
 
-        public Transform GetTrackableTransform()
+        /// <summary>
+        /// Controls how often updates to the UI text are made.
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerator UpdateDistanceText()
         {
-            return trackable.GetTrackableTransform();
+            var updateDelay = new WaitForSeconds(1 / textUpdatesPerSecond);
+
+            while (true)
+            {
+                distanceTMP.text = distanceFromPlayer.ToString();
+                yield return updateDelay;
+            }
         }
     }
 }

@@ -59,7 +59,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         }
 
         // Update is called once per frame
-        new void Update()
+        protected override void Update()
         {
             if (playerInVehicle)
             {
@@ -95,7 +95,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         public void EnterVehicle()
         {
             //turn tooltip off
-            if (toolTipObject) toolTipObject.SetActive(false);
+            ToolTipManager.ShowToolTip(ToolTipENUM.INTERACT, false);
 
             playerInVehicle = true;
             originalPosition = cameraXform.transform.localPosition;

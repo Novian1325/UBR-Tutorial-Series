@@ -47,11 +47,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             else Debug.LogError("Error! No Scriptable Object Loaded. What am I???");
         }
 
-        private new void Update()
-        {
-            base.Update();
-        }
-
         /// <summary>
         /// init from scriptable object if provided
         /// </summary>

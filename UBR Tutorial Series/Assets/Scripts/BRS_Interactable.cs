@@ -1,14 +1,14 @@
-﻿using UnityEngine;
+﻿using System.Text;
+using UnityEngine;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
     [RequireComponent(typeof(Collider))]
+    //[RequireComponent(typeof(BRS_Trackable))] // optional
     public class BRS_Interactable : RichMonoBehaviour
     {
         [Header("---Interactable---")]
-        [Tooltip("UI Tooltip Prompt that gets displayed to Player.")]
-        [SerializeField] protected GameObject toolTipObject; //protected means derived classes can use it like private
-
+        
         /// <summary>
         /// Trackable behavior that may be attached to this gameObject.
         /// </summary>
@@ -26,10 +26,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         }
 
         // Update is called once per frame
-        protected void Update()
+        protected virtual void Update()
         {
-            //Update must be called from derived class!
-
             //Handle Tooltips
             HandleTooltip();
             //set to false to verfiy next frame
@@ -42,7 +40,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         protected virtual void HandleTooltip()
         {
             //toggle tooltip
-            if (toolTipObject) toolTipObject.SetActive(playerIsLookingAtObject);
+            ToolTipManager.ShowToolTip(ToolTipENUM.INTERACT, playerIsLookingAtObject);
         }
 
         /// <summary>
@@ -50,10 +48,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         protected void RemoveTrackableFromCompass()
         {
-            if (trackable)
-            {
-                trackable.RemoveTrackable();
-            }
+            trackable?.RemoveTrackable();
         }
 
         /// <summary>
@@ -63,7 +58,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         public virtual void Interact(BRS_InteractionManager actor)
         {
             //this method should probably be overridden by derived class, ie a vehicle should do something that an item does not
-            var stringBuilder = new System.Text.StringBuilder();
+            var stringBuilder = new StringBuilder();
 
             stringBuilder.Append(actor.gameObject.name);
             stringBuilder.Append(" is interacting with ");

@@ -1,8 +1,9 @@
-﻿using UnityEngine.UI;
-using UnityEngine;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections;
-using System.Linq;
+using System.Linq; //
+using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
@@ -15,76 +16,52 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
     public class Compass : RichMonoBehaviour
     {
-        private static readonly float sortsPerSecond = .5f;// every other second
-        public RawImage CompassImage;
-        public Transform mainCameraXform;
-        public Text CompassDirectionText;
+        private static readonly float sortsPerSecond = 0.5f;// every other second
 
-        [Header("Readout Options")]
+        /// <summary>
+        /// Singleton pattern.
+        /// </summary>
+        private static Compass singletonInstance;
+
+        [Header("---Scene Refs---")]
+        [SerializeField]
+        private RawImage compassImage;
+        
+        private static RawImage CompassImage { get => singletonInstance.compassImage; }
+
+        private Transform mainCameraXform;
+
+        [SerializeField]
+        private TextMeshProUGUI compassDirectionText;
+
+        /// <summary>
+        /// Shortcut.
+        /// </summary>
+        public string CompassDirectionText { set => compassDirectionText.text = value; }
+
+        [Header("---Readout Options---")]
         [SerializeField] private bool ordinalLetters = true;//show N instead of 0 or S instead of 180
         [SerializeField] private DegreeIncrement degreeIncrement = DegreeIncrement.Five;// round to this number
 
-        [Header("Icons")]
+        [Header("---Prefabs---")]
         [SerializeField] private GameObject compassMarkerPrefab;// prefab used  //icons UV rect x value is between -.5 and .5
-        private List<BRS_CompassMarker> compassMarkerList = new List<BRS_CompassMarker>();
+
+        private static GameObject CompassMarkerPrefab { get => singletonInstance.compassMarkerPrefab; }
+
+        private static List<BRS_CompassMarker> compassMarkerList = new List<BRS_CompassMarker>();
 
         //coroutine references
         private Coroutine coroutine_CompassMarkerSort;//track coroutine so can stop/start (like when pausing game)
+        private Rect headingRect = new Rect(360, 0, 1, 1);
 
         private void Start()
         {
-            //find it 
-            if (mainCameraXform == null) mainCameraXform = 
-                    GameObject.FindGameObjectWithTag("MainCamera").transform;
-
             coroutine_CompassMarkerSort = StartCoroutine(SortCompassMarker(sortsPerSecond));
         }
 
         private void Update()
         {
-            var headingAngle = mainCameraXform.eulerAngles.y;
-
-            //Get a handle on the Image's uvRect
-            CompassImage.uvRect = new Rect(headingAngle / 360, 0, 1, 1);
-            //round heading
-            headingAngle = Mathf.RoundToInt(headingAngle / (int)degreeIncrement) * (int)degreeIncrement;
-
-            //convert the numbers to letters if pointing towards a direction (N/E/S/W)
-            if (ordinalLetters)
-            {
-                CompassDirectionText.text = ConvertAngleToLetter((int)headingAngle);
-            }
-            else
-            {
-                CompassDirectionText.text = headingAngle.ToString();
-            }
-
-            for (int i = 0; i < compassMarkerList.Count; ++i)
-            {
-                var compassMarker = compassMarkerList[i]; // get cached marker
-                var trackablePosition = compassMarker.GetTrackableTransform().position; // get target position
-                var distance = Vector3.Distance(mainCameraXform.position, trackablePosition); // get distance
-
-                compassMarker.SetDistanceFromPlayer(distance);
-
-                //check if Player is close enough to marker to be revealed
-                if (distance <= compassMarker.GetRevealDistance())
-                {
-                    //update uv rect on compass to reflect angle to player
-                    UpdateCompassMarker(compassMarker, trackablePosition, mainCameraXform);
-
-                    //enable it if it is not already so
-                    if (!compassMarker.isActiveAndEnabled)
-                    {
-                        compassMarker.gameObject.SetActive(true);
-                    }
-
-                }
-                else // too far away
-                {
-                    compassMarker.gameObject.SetActive(false);
-                }
-            }
+            UpdateHeading();
         }
 
         private void OnEnable()
@@ -97,109 +74,14 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             StopSorting();
         }
 
-        /// <summary>
-        /// Stops coroutine associated with sorting. Useful if game is paused or if there aren't enough to warrant sorting.
-        /// </summary>
-        public void StopSorting()
+        protected override void GatherReferences()
         {
-            if (coroutine_CompassMarkerSort != null) StopCoroutine(coroutine_CompassMarkerSort);
-        }
+            base.GatherReferences();
 
-        /// <summary>
-        /// Causes coroutines to resume.
-        /// </summary>
-        public void ResumeSorting()
-        {
-            //
-            if (coroutine_CompassMarkerSort == null)
-            {
-                coroutine_CompassMarkerSort = StartCoroutine(SortCompassMarker(sortsPerSecond));
-            }
-        }
+            if (mainCameraXform == null) mainCameraXform =
+                    GameObject.FindGameObjectWithTag("MainCamera").transform;
 
-        /// <summary>
-        /// Update the icon on the compass to match angle from player to trackable object
-        /// </summary>
-        /// <param name="compassMarker">marker with image to manipulate</param>
-        /// <param name="trackablePosition">Position of trackable object in World Space</param>
-        /// <param name="playerXform">Reference transform (player)</param>
-        private static void UpdateCompassMarker(BRS_CompassMarker compassMarker, Vector3 trackablePosition, Transform playerXform)
-        {
-            var relative = playerXform.InverseTransformPoint(trackablePosition);
-            var angle = Mathf.Atan2(relative.x, relative.z) * Mathf.Rad2Deg;
-
-            compassMarker.GetCompassMarkerImage().uvRect = new Rect(-angle / 360, 0, 1, 1); //need a value between -.5 an .5 for uvRect
-        }
-
-        /// <summary>
-        /// Coroutine used to restrict frequency of list sorting. Helps with performance
-        /// </summary>
-        /// <param name="sortsPerSecond"></param>
-        /// <returns></returns>
-        private IEnumerator SortCompassMarker(float sortsPerSecond = 1)
-        {
-            var sortDelay = new WaitForSeconds(1 / sortsPerSecond); // create and re-use
-
-            while (true)
-            {
-                if (compassMarkerList.Count > 1)
-                {
-                    //LINQ is not very performant, especially in a repeating function. Use SelectionSort instead
-                    //order icons so closest object to player is on top of all other icons
-                    compassMarkerList = compassMarkerList.OrderBy(o => o.GetDistanceFromPlayer()).ToList();
-
-                    for (var i = 0; i < compassMarkerList.Count; ++i)
-                    {
-                        compassMarkerList[i].transform.SetSiblingIndex(compassMarkerList.Count - 1 - i);
-                    }
-                }
-
-                yield return sortDelay;
-            }
-        }
-
-        /// <summary>
-        /// Adds the given trackable to the top compass.
-        /// </summary>
-        /// <param name="newTrackable">Trackable whose texture and color will be used on the icon.</param>
-        public void RegisterTrackable(BRS_Trackable newTrackable)
-        {
-            //check if already exists
-            foreach (var marker in compassMarkerList)
-            {
-                if (marker.CompareTrackable(newTrackable)) return;
-            }
-
-            //create new marker
-            var compassMarker = Instantiate(compassMarkerPrefab, CompassImage.transform)
-                .GetComponent<BRS_CompassMarker>() as BRS_CompassMarker;
-
-            //initialize marker with image, color, and distance
-            compassMarker.InitCompassMarker(newTrackable);
-
-            //add trackables to list
-            compassMarkerList.Add(compassMarker);
-        }
-
-        /// <summary>
-        /// Removes trackable from the compass.
-        /// </summary>
-        /// <param name="trackable">trackable to remove</param>
-        public void UnregisterTrackable(BRS_Trackable trackable)
-        {
-            for (var i = 0; i < compassMarkerList.Count; ++i)
-            {
-                var marker = compassMarkerList[i];//cache
-
-                if (marker.CompareTrackable(trackable))
-                {
-                    //remove marker icon reference
-                    compassMarkerList.Remove(marker);//this is safe as long as there is a 'break' at the end
-                    //destroy UI element
-                    if (marker) Destroy(marker.gameObject);
-                    break;
-                }
-            }
+            InitSingleton();
         }
 
         /// <summary>
@@ -241,6 +123,198 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                     break;
             }
             return outputText;
+        }
+
+        /// <summary>
+        /// Only a single instance of Compass should ever exist.
+        /// </summary>
+        private void InitSingleton()
+        {
+            if (!singletonInstance)
+            {
+                singletonInstance = this;
+            }
+            else
+            {
+                Debug.LogError("[Compass] Too many instances of Compass in Scene", this);
+                Destroy(this.gameObject); // get outta here, you imposter!
+            }
+
+        }
+
+        private void UpdateDistances()
+        {
+            for (int i = 0; i < compassMarkerList.Count; ++i)
+            {
+                var compassMarker = compassMarkerList[i]; // get cached marker
+                var trackablePosition = compassMarker.GetTrackableTransform().position; // get target position
+                var distance = Vector3.Distance(mainCameraXform.position, trackablePosition); // get distance
+
+                compassMarker.SetDistanceFromPlayer(distance); // store this value on the marker
+
+                //check if Player is close enough to marker to be revealed
+                if (distance <= compassMarker.GetRevealDistance())
+                {
+                    //update uv rect on compass to reflect angle to player
+                    UpdateCompassMarker(compassMarker, trackablePosition, mainCameraXform);
+
+                    //enable it if it is not already so
+                    if (!compassMarker.isActiveAndEnabled)
+                    {
+                        compassMarker.gameObject.SetActive(true);
+                    }
+
+                }
+                else // too far away
+                {
+                    compassMarker.gameObject.SetActive(false);
+                }
+            }
+        }
+
+        private void UpdateHeading()
+        {
+            var headingAngle = mainCameraXform.eulerAngles.y;
+
+            //Get a handle on the Image's uvRect
+            headingRect.x = headingAngle / 360;
+            compassImage.uvRect = headingRect;
+
+            //round heading
+            headingAngle = Mathf.RoundToInt(headingAngle / (int)degreeIncrement) * (int)degreeIncrement;
+
+            //convert the numbers to letters if pointing towards a direction (N/E/S/W)
+            if (ordinalLetters)
+            {
+                compassDirectionText.text = ConvertAngleToLetter((int)headingAngle);
+            }
+            else
+            {
+                compassDirectionText.text = headingAngle.ToString();
+            }
+        }
+
+        /// <summary>
+        /// Update the icon on the compass to match angle from player to trackable object
+        /// </summary>
+        /// <param name="compassMarker">marker with image to manipulate</param>
+        /// <param name="trackablePosition">Position of trackable object in World Space</param>
+        /// <param name="playerXform">Reference transform (player)</param>
+        private void UpdateCompassMarker(BRS_CompassMarker compassMarker,
+            Vector3 trackablePosition, Transform playerXform)
+        {
+            var relative = playerXform.InverseTransformPoint(trackablePosition);
+            var angle = Mathf.Atan2(relative.x, relative.z) * Mathf.Rad2Deg; // yay trigonometry!
+
+            headingRect.x = -angle / 360; // convert angle to displacement of UI element
+            compassMarker.GetCompassMarkerImage().uvRect = headingRect; //need a value between -.5 an .5 for uvRect
+        }
+
+        /// <summary>
+        /// Stops coroutine associated with sorting. Useful if game is paused or if there aren't enough to warrant sorting.
+        /// </summary>
+        public void StopSorting()
+        {
+            if (coroutine_CompassMarkerSort != null) StopCoroutine(coroutine_CompassMarkerSort);
+        }
+
+        /// <summary>
+        /// Causes coroutines to resume.
+        /// </summary>
+        public void ResumeSorting()
+        {
+            //
+            if (coroutine_CompassMarkerSort == null)
+            {
+                coroutine_CompassMarkerSort = StartCoroutine(SortCompassMarker(sortsPerSecond));
+            }
+        }
+
+        /// <summary>
+        /// Coroutine used to restrict frequency of list sorting. Helps with performance
+        /// </summary>
+        /// <param name="sortsPerSecond"></param>
+        /// <returns></returns>
+        private IEnumerator SortCompassMarker(float sortsPerSecond = 1)
+        {
+            var sortDelay = new WaitForSeconds(1 / sortsPerSecond); // create and re-use
+
+            while (true)
+            {
+                UpdateDistances(); // update all distances from markers to active player
+
+                if (compassMarkerList.Count > 1)
+                {
+                    //TODO: LINQ is not very performant, especially in a repeating function. Use SelectionSort instead
+                    //order icons so closest object to player is on top of all other icons
+                    compassMarkerList = compassMarkerList.OrderBy(o => o.GetDistanceFromPlayer()).ToList();
+
+                    for (var i = 0; i < compassMarkerList.Count; ++i)
+                    {
+                        compassMarkerList[i].transform.SetSiblingIndex(compassMarkerList.Count - 1 - i);
+                    }
+                }
+
+                yield return sortDelay;
+            }
+        }
+
+        /// <summary>
+        /// Adds the given trackable to the top compass.
+        /// </summary>
+        /// <param name="newTrackable">Trackable whose texture and color will be used on the icon.</param>
+        public static void RegisterTrackable(BRS_Trackable newTrackable)
+        {
+            //do nothing if no Compass in Scene
+            if (!singletonInstance)
+            {
+                Debug.Log("[Compass] No Compass in Scene.");
+                return;
+            }
+
+            //check if already exists
+            foreach (var marker in compassMarkerList)
+            {
+                if (marker.CompareTrackable(newTrackable)) return;
+            }
+
+            //create new marker
+            var compassMarker = Instantiate(CompassMarkerPrefab, CompassImage.transform)
+                .GetComponent<BRS_CompassMarker>() as BRS_CompassMarker;
+
+            //initialize marker with image, color, and distance
+            compassMarker.InitCompassMarker(newTrackable);
+
+            //add trackables to list
+            compassMarkerList.Add(compassMarker);
+        }
+
+        /// <summary>
+        /// Removes trackable from the compass.
+        /// </summary>
+        /// <param name="trackable">trackable to remove</param>
+        public static void UnregisterTrackable(BRS_Trackable trackable)
+        {
+            //do nothing if no Compass in Scene
+            if (!singletonInstance)
+            {
+                Debug.Log("[Compass] No Compass in Scene.");
+                return;
+            }
+
+            for (var i = 0; i < compassMarkerList.Count; ++i)
+            {
+                var marker = compassMarkerList[i];//cache
+
+                if (marker.CompareTrackable(trackable))
+                {
+                    //remove marker icon reference
+                    compassMarkerList.Remove(marker);//this is safe as long as there is a 'break' at the end
+                    //destroy UI element
+                    if (marker) Destroy(marker.gameObject); // TODO: consider pooling 
+                    break;
+                }
+            }
         }
     }
 

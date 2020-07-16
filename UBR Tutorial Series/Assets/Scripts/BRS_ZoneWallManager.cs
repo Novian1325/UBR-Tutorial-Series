@@ -13,6 +13,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Tooltip("How many segments should the circle that appears on the mimimap be? More segments means it looks crisper, but at cost of performance.")]
         [SerializeField] private int lineRendererSegments = 64;//64 seems perfect
 
+        /// <summary>
+        /// The projecte image on the rim of ZoneWall. Not needed
+        /// </summary>
         [Tooltip("The projecte image on the rim of ZoneWall. Not needed")]
         [SerializeField] private Projector safeZone_Circle_Projector;
 
@@ -22,7 +25,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Header("---Zone Phase Options---")]
         [Tooltip("Scriptable Object containing options for shrink time, radius, damage.")]
         [SerializeField] private ShrinkPhaseOptions shrinkPhaseOptions;
-
 
         #region Private Variables
 
@@ -97,6 +99,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private CapsuleCollider capsuleCollider;
         #endregion
 
+        /// <summary>
+        /// See Debug statements about what's going on during runtime.
+        /// </summary>
         [Tooltip("Would the developer like to see Debug statements about what's going on during runtime?")]
         [SerializeField] private bool DEBUG = false;
 
@@ -355,7 +360,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 {
                     Debug.LogFormat("RandomPoint: {0}", randPoint);
                     Debug.LogFormat("NewCenterPoint: {0}", newCenterPoint);
-                    Debug.LogFormat("Distance: {0}; Current Radius: {1}", Vector3.Distance(currentCenter, newCenterPoint), currentRadius);
+                    Debug.LogFormat("Distance: {0}; Current Radius: {1}", 
+                        Vector3.Distance(currentCenter, newCenterPoint), 
+                        currentRadius);
                 }
 
                 //to prevent infinite loop

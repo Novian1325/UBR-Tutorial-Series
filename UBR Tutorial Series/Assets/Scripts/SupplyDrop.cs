@@ -48,7 +48,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// Distance from the ground to this object when it is created.
         /// </summary>
         private int initialDistanceToGround = 0;
-        private Rigidbody rb;
+        private Rigidbody myRigidbody;
 
         /// <summary>
         /// Holder variable for supplies. probably scriptable objects or itemManagers
@@ -58,7 +58,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         protected override void GatherReferences()
         {
             base.GatherReferences();
-            this.rb = this.GetComponent<Rigidbody>() as Rigidbody;
+            this.myRigidbody = this.GetComponent<Rigidbody>() as Rigidbody;
             if (this.parachute == null) this.parachute = this.GetComponentInChildren<Parachute>();
         }
 
@@ -66,7 +66,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         void Start()
         {
             //external reference
-            supplyDropManager = SupplyDropManager.supplyDropManagerInstance as SupplyDropManager;
+            supplyDropManager = SupplyDropManager.supplyDropManagerInstance;
             if (supplyDropManager) supplyDropManager.AddSupplyDrop(this);
 
             //init state
@@ -86,7 +86,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         }
 
         // Update is called once per frame
-        new void Update()
+        protected override void Update()
         {
             base.Update();//tooltip stuff
 
@@ -132,7 +132,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 //fall
                 case SkyDivingStateENUM.parachuting:
                     //force forward
-                    this.rb.AddForce(this.transform.forward * forwardMomentum, ForceMode.Impulse);
+                    this.myRigidbody.AddForce(this.transform.forward * forwardMomentum, ForceMode.Impulse);
                     break;
 
                 case SkyDivingStateENUM.startLanded:
@@ -147,7 +147,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             }//end switch
 
             //cap downward velocity
-            this.rb.velocity = this.rb.velocity.y < terminalVelocity ? terminalVelocityVector : this.rb.velocity;
+            this.myRigidbody.velocity = this.myRigidbody.velocity.y < terminalVelocity ? terminalVelocityVector : this.myRigidbody.velocity;
 
             //Debug.Log("Velocity: " + this.rb.velocity + "/ terminal velocity: " + terminalVelocity);
         }//end FixedUpdate()
@@ -219,7 +219,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         {
             freefallingState = SkyDivingStateENUM.landed;
             if (parachute) parachute.DestroyParachute();//how the parachute is destroyed is up to the class implementation
-            rb.freezeRotation = true;
+            myRigidbody.freezeRotation = true;
             
             //handle destruction timer
             if(destroyAfterSeconds_lifetime > 0)

@@ -23,7 +23,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             animator = this.GetComponent<Animator>();
         }
 
-        new private void Update()
+        protected override void Update()
         {
             base.Update();
 
