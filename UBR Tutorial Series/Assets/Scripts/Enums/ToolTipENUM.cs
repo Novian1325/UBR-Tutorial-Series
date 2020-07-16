@@ -3,8 +3,8 @@
     public enum ToolTipENUM
     {
         SKYDIVE,
-        DEPLOYPARACHUTE
-
+        DEPLOYPARACHUTE,
+        INTERACT
     }
     //add one enum per tooltip
 
