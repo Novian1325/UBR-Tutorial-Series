@@ -152,7 +152,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         {
             var marker = GameObject.CreatePrimitive(PrimitiveType.Sphere) as GameObject;//create obj
             marker.GetComponent<MeshRenderer>().enabled = false;//don't need to see this object
-            marker.name = "Plane Path Raycast Target.";
+            marker.name = "Plane Path Raycast Target."; // name it so you don't say WTF in the hierarchy
 
             return marker;
         }
@@ -178,7 +178,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 (Mathf.Cos(randomArc) * spawnBoundsCircleRadius) + planeSpawnBounds.position.x, //get x coordiantes on unit circle, multiply by radius, offset relative to bounds
                 planeFlightAltitude, // set the height
                 (Mathf.Sin(randomArc) * spawnBoundsCircleRadius) + planeSpawnBounds.position.z);//get y coordinate on unity circle, multiply by radius, offset relative to bounds
-                                                                                                //Debug.Log("random point: " + randomPoint);
+                //Debug.Log("random point: " + randomPoint);
+                //could also use sqrt(1 - x^2), but I like using the trig functions
             return randomPoint;
         }
 
@@ -323,9 +324,10 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //this altitude is not working. keep raising
             if (++unsuccessfulPasses > flightPathChecksUntilFailure)//we've been here before
             {
-                Debug.LogError("ERROR! Flight path failed after " 
+                Debug.LogError("[PlanePathManager] Flight pathfinding failed after " 
                     + unsuccessfulPasses * flightPathChecksUntilFailure
-                    + " attempts. Adjust planeSpawnBounds. Skipping Plane Deployment", this);
+                    + " attempts. Tips: Widen planeSpawnBounds, " + 
+                    "increase size and/or number of Drop Zones Skipping Plane Deployment", this);
                 unsuccessfulPasses = 0;
                 planeFlightAltitude = startingFlightAltitude;//reset altitude for next try
                 return false;
@@ -349,11 +351,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             plane.transform.LookAt(planeEndPoint);//point plane towards endpoint
 
             //get plane manager
-            var planeManager = plane.GetComponent<PlaneManager>() as PlaneManager;
-            if (planeManager == null)
-            {
-                planeManager = plane.AddComponent<PlaneManager>();//create it if it doesn't exist
-            }
+            var planeManager = plane.GetComponent<PlaneManager>() as PlaneManager
+                ?? plane.AddComponent<PlaneManager>() as PlaneManager;//create it if it doesn't exist
 
             //init plane
             planeManager.InitPlane(targetDropZone, cargo_Players.ToArray(), 
@@ -370,7 +369,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <param name="targetObject"></param>
         /// <param name="acceptableDropZones"></param>
         /// <returns></returns>
-        private bool TestRaycastThroughDropZone(Vector3 startPoint, Vector3 targetObject, GameObject[] acceptableDropZones)
+        private bool TestRaycastThroughDropZone(Vector3 startPoint, 
+            Vector3 targetObject, GameObject[] acceptableDropZones)
         {
             //did the raycast go through a drop zone?
             var raycastThroughDropZone = false;
@@ -378,15 +378,17 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //RaycastHit will store information about anything hit by the raycast
             RaycastHit raycastHitInfo;
             //raycast
-            if (Physics.Raycast(startPoint, targetObject - startPoint, out raycastHitInfo, (spawnBoundsCircleRadius + 10) * 2,
+            if (Physics.Raycast(startPoint, targetObject - startPoint, out raycastHitInfo, 
+                (spawnBoundsCircleRadius + 10) * 2,
                 Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide))
             {
                 if (DEBUG)
                 {
                     Debug.Log("Testing Raycast Through DropZone. Hit: "
-                    + raycastHitInfo.collider.gameObject.name, raycastHitInfo.collider.gameObject);
+                    + raycastHitInfo.collider.gameObject.name, // name
+                    raycastHitInfo.collider.gameObject); // reference
 
-                    Debug.Log("Possible Zone Count: " + acceptableDropZones.Length);
+                    //Debug.Log("Possible Zone Count: " + acceptableDropZones.Length);
                 }
 
                 for (var i = 0; i < acceptableDropZones.Length; ++i)//look through each drop zone in list
