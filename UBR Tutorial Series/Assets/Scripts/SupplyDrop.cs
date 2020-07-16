@@ -173,7 +173,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         private void OnTriggerExit(Collider other)
         {
-            if (other.gameObject.CompareTag("ZoneWall"))
+            if (other.gameObject == BRS_ZoneWallManager.GameObject)
             {
                 if(destroyAfterSeconds_outsideZoneWall > 0)
                 {
@@ -187,7 +187,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         private void StartFreeFalling()
         {
-            initialDistanceToGround = BRS_Utility.GetDistanceToTerrain(this.transform.position);
+            initialDistanceToGround = BRS_Utility.
+                GetDistanceToTerrain(this.transform.position);
 
             //what state to start in?
             if(initialDistanceToGround <= 5)
@@ -206,7 +207,8 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private void FreeFalling()
         {
             //check distance to ground
-            if (BRS_Utility.GetDistanceToTerrain(this.transform.position) < deployParachuteDistancePercent * initialDistanceToGround)
+            if (BRS_Utility.GetDistanceToTerrain(this.transform.position) 
+                < deployParachuteDistancePercent * initialDistanceToGround)
             {
                 DeployParachute();
             }
@@ -266,7 +268,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             //throw loot all over the ground like a maniac
             //play an effect
-            Debug.Log("Destroying Supply Drop.");
+            Debug.Log("[SupplyDrop] Destroying Supply Drop.");
             Destroy(this.gameObject); //Destroy(this.gameObject, 3);
         }
     }    
