@@ -4,7 +4,7 @@ using UnityStandardAssets.CrossPlatformInput;
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
     [RequireComponent(typeof(BRS_TPCharacter))]
-    public class BRS_TPController : MonoBehaviour
+    public class BRS_TPController : RichMonoBehaviour
     {
         //mouse camera stuff
         public float m_MouseOrbitSensitivityX = .5f;

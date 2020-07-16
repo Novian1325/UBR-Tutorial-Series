@@ -2,7 +2,7 @@
 
 namespace PolygonPilgrimage.BattleRoyaleKit
 {
-    public class BRS_TPCharacter : MonoBehaviour
+    public class BRS_TPCharacter : RichMonoBehaviour
     {
         [SerializeField] float m_MovingTurnSpeed = 360;
         [SerializeField] float m_StationaryTurnSpeed = 180;
@@ -27,7 +27,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         Vector3 m_CapsuleCenter;
         CapsuleCollider m_Capsule;
         bool m_Crouching;
-
 
         void Start()
         {
