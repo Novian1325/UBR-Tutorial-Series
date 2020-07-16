@@ -626,7 +626,7 @@ MonoBehaviour:
     type: 3}
   planeSpeed_PlayerDrop: 50
   planeSpeed_SupplyDrop: 350
-  flightPathChecksUntilFailure: 30
+  flightPathChecksUntilFailure: 15
   DEBUG: 0
 --- !u!1 &8631552969835342197
 GameObject:
