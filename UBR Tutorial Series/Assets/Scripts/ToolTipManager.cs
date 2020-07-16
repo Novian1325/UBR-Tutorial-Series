@@ -74,7 +74,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             }
         }
 
-        public void DisableAllToolTips()
+        public static void DisableAllToolTips()
         {
             //iterating through a dictionary sucks, so iterate through a list of keys
             for (var i = 0; i < toolTips.Count; ++i)
@@ -93,6 +93,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
             if(toolTips.TryGetValue(toolTipKey, out tip))
             {
+                DisableAllToolTips();
                 tip.SetActive(active);
             }
             else
