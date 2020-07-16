@@ -9,36 +9,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
     /// This class handles checking if the behavior is outside of the bounds and deals damage accordingly.
     /// </summary>
     [RequireComponent(typeof(Collider))]
+    [RequireComponent(typeof(BRS_PlayerHealthManager))]
     public class BRS_ZoneDamage : RichMonoBehaviour
     {
-        #region static variables
-        /// <summary>
-        /// For DEMO purposes ONLY.  Reset our Health to full when we re-enter the Zone!
-        /// </summary>
-        private static readonly bool _DebugHealth = false;
-
-        /// <summary>
-        /// The GameObject with Colliders that represent the bounds of the Zone Wall.
-        /// </summary>
-        private static GameObject _zoneWallObject;
-
-        /// <summary>
-        /// Class that controls manipulating the bounds of the Zone Wall Object.
-        /// </summary>
-        private static BRS_ZoneWallManager _zoneWallManager;
-        
-        /// <summary>
-        /// Transform attached to this GO.
-        /// </summary>
-        private Transform cachedTransform;
-
-        /// <summary>
-        /// Collection of the shrink phases
-        /// </summary>
-        private static ShrinkPhase[] _shrinkPhaseArray;
-
-        #endregion
-
         #region Visible In Inspector
         
         /// <summary>
@@ -48,21 +21,28 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [SerializeField] private GameObject cameraToOverride;
 
         /// <summary>
-        /// The object that should handle the dealing of the damage.
-        /// </summary>
-        [Header("---UI References---")]
-        [Tooltip("The object that should handle the dealing of the damage.")]
-        [SerializeField] private BRS_PlayerHealthManager healthManager;
-
-        /// <summary>
         /// When Player is outside of the zone wall, this line will appear and guide the player back to the safe zone.
         /// </summary>
+        [Header("---UI References---")]
         [SerializeField]
         private LineRenderer linePointingToCircleCenter;
+
+        /// <summary>
+        /// For DEMO purposes ONLY.  Reset our Health to full when we re-enter the Zone!
+        /// </summary>
+        [Header("---Debugging---")]
+        [Tooltip("For DEMO purposes ONLY.  Reset our Health to full when we re-enter the Zone!")]
+        [SerializeField]
+        private bool debugHealth = false;
 
         #endregion
 
         #region Internal Private Variables
+
+        /// <summary>
+        /// The object that should handle the dealing of the damage.
+        /// </summary>
+        private BRS_PlayerHealthManager healthManager;
 
         /// <summary>
         /// Is this Behavior inside the bounds of the Zone Wall?
@@ -76,14 +56,6 @@ namespace PolygonPilgrimage.BattleRoyaleKit
 
         #endregion
 
-        protected override void Awake()
-        {
-            base.Awake();
-
-            //handle static references
-            InitStaticReferences();
-        }
-
         void Start()
         {
             //handle instance references
@@ -93,39 +65,40 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         //called once per frame
         private void Update()
         {
-            if (!inZone)//if not in the zone
-            {
+            if (!inZone)//if outside the ZoneWall
+            {   //ouch!
                 HandleZoneDamage();
                 DrawLineToCircle();
             }
-            else if (_DebugHealth)//if inside zone and debugging health....
+            else if (debugHealth)//if inside zone and debugging health....
             {
                 //increase health (for debugging purposes)
-                healthManager.ChangeHealth(healthManager.GetMaxHealth());
+                healthManager.SetToMaxHealth(); // reset to max health
+                //note: won't prevent death.
             }
         }
 
         void OnTriggerExit(Collider col)
         {
             //If we leave the zone, we will be damaged!
-            if (col.gameObject == _zoneWallObject)
+            if (col.gameObject == BRS_ZoneWallManager.GameObject)
             {
                 inZone = false;
                 //set the next Time the healthManager should be dealt a damage tick
-                nextDamageTickTime += 1 / _shrinkPhaseArray[_zoneWallManager.GetShrinkPhase()].ticksPerSecond;
+                nextDamageTickTime += 1 / BRS_ZoneWallManager.GetTicksPerSecond();
 
-                // TODO - change Post Processing            
+                // TODO: change Post Processing            
             }
         }
 
         void OnTriggerEnter(Collider col)
         {
             //If we are inside the zone, all is good!
-            if (col.gameObject == _zoneWallObject)
+            if (col.gameObject == BRS_ZoneWallManager.GameObject)
             {
                 inZone = true;
 
-                // TODO - change Post Processing 
+                // TODO: change Post Processing 
             }
 
             linePointingToCircleCenter.enabled = false;
@@ -137,50 +110,40 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             {
                 linePointingToCircleCenter.enabled = true;
             }
-            
+                        
             //starting point is player's current position, drawn at appropriate height
-            var pointPosition = cachedTransform.position;
-            pointPosition.y = _zoneWallManager.GetDrawHeight();//set height
+            var pointPosition = transform.position;
+            pointPosition.y = BRS_ZoneWallManager.GetDrawHeight();//set height
             linePointingToCircleCenter.SetPosition(0, pointPosition);//set starting point
 
-            //set endoing point, a point on the edge of the circle
-            var playerPositionRelativeToWall = _zoneWallObject.transform.InverseTransformPoint(cachedTransform.position);//convert world space point of player into local space of zoneWall circle
-            var angle = Mathf.Atan2(playerPositionRelativeToWall.z, playerPositionRelativeToWall.x) * Mathf.Rad2Deg;//get the angle between Player and centerpoint of zone wall circle
-            var radius = _zoneWallManager.GetCurrentRadius();//get radius of circle
+            //set ending point, a point on the edge of the circle
+            var playerPositionRelativeToWall = BRS_ZoneWallManager.Instance.transform.
+                InverseTransformPoint(transform.position);//convert world space point of player into local space of zoneWall circle
+            var angle = Mathf.Atan2(playerPositionRelativeToWall.z, 
+                playerPositionRelativeToWall.x) * Mathf.Rad2Deg;//get the angle between Player and centerpoint of zone wall circle
 
-            var zoneWallPosition = _zoneWallObject.transform.position;//get x,z coordinates of circle
-            //yay trig!
-            pointPosition.x = zoneWallPosition.x + radius * Mathf.Cos(angle * (Mathf.PI / 180));//get x coordinate of point on edge of circle
-            pointPosition.z = zoneWallPosition.z + radius * Mathf.Sin(angle * (Mathf.PI / 180));//get y coordinate of point on edge of circle
+            //on the MiniMap, point a line from the Player towards the edge of the Zone
+            var radius = BRS_ZoneWallManager.GetCurrentRadius();//get radius of circle
+
+            var zoneWallPosition = BRS_ZoneWallManager.Instance
+                .transform.position;//get x,z coordinates of circle
+            //yay trigonometry!
+            pointPosition.x = zoneWallPosition.x 
+                + radius * Mathf.Cos(angle * (Mathf.PI / 180));//get x coordinate of point on edge of circle
+            pointPosition.z = zoneWallPosition.z 
+                + radius * Mathf.Sin(angle * (Mathf.PI / 180));//get y coordinate of point on edge of circle
 
             linePointingToCircleCenter.SetPosition(1, pointPosition);//set endpoint on edge of circle
         }
 
-        /// <summary>
-        /// Finds references to the Zone Wall objects.
-        /// </summary>
-        private static void InitStaticReferences()
+        protected override void GatherReferences()
         {
-            if (!_zoneWallManager)
-            {
-                //find a reference to the GameObject with a tag
-                _zoneWallObject = GameObject.FindGameObjectWithTag("ZoneWall") as GameObject;
+            base.GatherReferences();
 
-                if (_zoneWallObject)//if it exists
-                {
-                    //get a reference to the Zone Wall Manager script
-                    _zoneWallManager = _zoneWallObject.GetComponent<BRS_ZoneWallManager>() as BRS_ZoneWallManager;
-                    _shrinkPhaseArray = _zoneWallManager.GetShrinkPhases();
+            healthManager = GetComponent<BRS_PlayerHealthManager>()
+                as BRS_PlayerHealthManager;
 
-                    //if it does not exist... complain
-                    if (!_zoneWallManager) Debug.LogError("ERROR! ZoneDamage behavior cannot find zoneWallManager Component on " + _zoneWallObject.name);
-                }
-                else
-                {
-                    //complain
-                    Debug.LogError("ERROR! No GameObject in Scene with tag 'ZoneWall'!");
-                }
-            }
+            //TODO: MATTT!!!!!! INIT post processing
         }
 
         /// <summary>
@@ -188,26 +151,14 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         private void VerifyReferences()
         {
-            //INIT post processing
-
-            //verify reference to health manager
-            if (!healthManager)
-            {
-                healthManager = GetComponent<BRS_PlayerHealthManager>() as BRS_PlayerHealthManager;
-
-                if (!healthManager)
-                {
-                    Debug.LogError("ERROR! Reference to HealthManager not set and cannot be located on " + this.gameObject.name, this.gameObject);
-                }
-            }
-
             if (!linePointingToCircleCenter)
             {
-                Debug.LogError("ERROR! Line Renderer not assigned on Player.", this);
+                Debug.LogError("[ZoneDamage] Line Renderer not assigned on Player.", this);
+                return;
             }
             linePointingToCircleCenter.enabled = false; //start with object disabled;
-
-            cachedTransform = transform;
+            linePointingToCircleCenter.positionCount = 2; // straight line has 2 points
+            linePointingToCircleCenter.useWorldSpace = true;
         }
         
         /// <summary>
@@ -218,12 +169,11 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             if (Time.time > nextDamageTickTime)//if it's time to deal a damage tick
             {
                 //Damage the healthManager depending on the phase of the zone wall
-                healthManager.ChangeHealth(-_shrinkPhaseArray[_zoneWallManager.GetShrinkPhase()].damagePerTick);//DEAL DAMAGE
+                healthManager.ChangeHealth(-BRS_ZoneWallManager.GetDamagePerTick());
 
                 //set the next Time to deal a tick damage
-                nextDamageTickTime += 1 / _shrinkPhaseArray[_zoneWallManager.GetShrinkPhase()].ticksPerSecond;
+                nextDamageTickTime += 1 / BRS_ZoneWallManager.GetTicksPerSecond();
             }
         }
     }
-
 }
