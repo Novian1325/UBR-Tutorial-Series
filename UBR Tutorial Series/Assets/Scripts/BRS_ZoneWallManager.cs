@@ -502,7 +502,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// Damage is dealt every "tick".
         /// </summary>
         /// <returns></returns>
-        public static int GetTicksPerSecond()
+        public static float GetTicksPerSecond()
         {
             return Instance.CurrentShrinkPhase.TicksPerSecond;
         }

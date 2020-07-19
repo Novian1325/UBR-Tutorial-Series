@@ -38,9 +38,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// </summary>
         [Tooltip("The frequency of the damage ticks per second.")]
         [SerializeField]
-        private int ticksPerSecond;
+        private float ticksPerSecond;
 
-        public int TicksPerSecond { get => ticksPerSecond; } // readonly
+        public float TicksPerSecond { get => ticksPerSecond; } // readonly
 
         /// <summary>
         /// The amount of damage that is given every one time damage is dealt.
