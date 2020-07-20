@@ -13,10 +13,20 @@ public static class SceneMenu
     //    EditorSceneManager.OpenScene("Assets/Scenes/EmpiresEdge.unity");
     //}
 
-        [MenuItem("SceneMenu/Workshop")]
+    [MenuItem("SceneMenu/Workshop")]
     private static void LoadWorkshopScene()
     {
         EditorSceneManager.OpenScene("Assets/Scenes/Workshop.unity");
     }
-    
+    [MenuItem("SceneMenu/Network Test")]
+    private static void LoadNetworkTestScene()
+    {
+        EditorSceneManager.OpenScene("Assets/Scenes/NetworkTest.unity");
+    }
+    [MenuItem("SceneMenu/Start Master Server")]
+    private static void LoadStartMasterServerScene()
+    {
+        EditorSceneManager.OpenScene("Assets/Scenes/Start Master Server.unity");
+    }
+
 }
