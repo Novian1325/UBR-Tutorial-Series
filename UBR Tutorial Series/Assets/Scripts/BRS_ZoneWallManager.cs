@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using UnityEngine;
+using UnityEngine.Events;
 
 //NOTE! Sizes and lengths are given in Unity Meters unless otherwise noted.
 
@@ -98,9 +99,11 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private LineRenderer lineRenderer;
 
         /// <summary>
-        /// Cached Transform of the parent Object.
+        /// Cached Transform of the ZoneWall Object.
         /// </summary>
-        private Transform ZoneWallXform { get => transform; }
+        public Transform ZoneWallXform { get => transform; }
+
+        public bool IsShrinking { get => shrinking; } // readonly
 
         /// <summary>
         /// Capsule Collider attached to this GameObject. Used as a reference for Scale.
