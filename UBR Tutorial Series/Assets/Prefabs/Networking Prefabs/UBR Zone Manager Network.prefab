@@ -123,6 +123,12 @@ PrefabInstance:
       propertyPath: rotateSpeed.z
       value: 3
       objectReference: {fileID: 0}
+    - target: {fileID: 8249494933047949946, guid: bbf38460c5ff5ec48a9c1b8879fa7a3d,
+        type: 3}
+      propertyPath: shrinkPhaseOptions
+      value: 
+      objectReference: {fileID: 11400000, guid: e56a013de168e63459ddc3471f590b26,
+        type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bbf38460c5ff5ec48a9c1b8879fa7a3d, type: 3}
 --- !u!1 &7524748064489779500 stripped
