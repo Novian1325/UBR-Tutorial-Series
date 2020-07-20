@@ -34,8 +34,11 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Tooltip("Scriptable Object containing options for shrink time, radius, damage.")]
         [SerializeField] private ShrinkPhaseOptions shrinkPhaseOptions;
 
+        /// <summary>
+        /// Tick rate, damage, radius, and other information for each Phase.
+        /// </summary>
         private ShrinkPhase CurrentShrinkPhase
-        { get => shrinkPhaseOptions.ShrinkPhases[shrinkPhaseIndex]; }
+        { get => shrinkPhaseOptions.ShrinkPhases[shrinkPhaseIndex]; } // readonly
 
         #region Private Variables
 
