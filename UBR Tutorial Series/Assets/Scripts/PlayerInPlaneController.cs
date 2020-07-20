@@ -30,6 +30,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private SkyDiveHandler skyDiveController;
         private BRS_TPCharacter playerCharacter;
         private BRS_TPController playerController;
+        private BRS_ZoneDamage zoneDamager;
 
         private void Update()
         {
@@ -110,6 +111,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             playerCharacter.ShowPlayerModel(true);//make the player visible again
 
             //playerController.TogglePlayerControls(true);//normal control does not resume until after skydiving
+            zoneDamager.enabled = true;
 
             camTrans.SetParent(originalPivot);//set parent back to player's pivot
             camTrans.localPosition = cameraStartingPosition;//reset
@@ -121,17 +123,19 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         {
             //initialization method to tell the camera which object to orbit around, turn off other player controls, and other things
             //disable player controls
-            this.planeManager = planeMan;//will need to tell plane manager that it wants to jump
-            this.cameraPivot = planeManager.GetCameraPivot();//sett the pivot to that of the plane
-            this.skyDiveController = GetComponent<SkyDiveHandler>();//get handle on SkyDive controller script
-            this.playerCharacter = GetComponent<BRS_TPCharacter>();//get a reference to the character to get at its model
-            this.playerController = GetComponent<BRS_TPController>();
-            this.playerTransform = this.transform;
-            this.originalParent = this.transform.parent;//player will be parented to plane, and then re-parented back here
-            this.myRigidbody = GetComponent<Rigidbody>();
-            this.enabled = true;//make sure it is turned on
+            planeManager = planeMan;//will need to tell plane manager that it wants to jump
+            cameraPivot = planeManager.GetCameraPivot();//sett the pivot to that of the plane
+            skyDiveController = GetComponent<SkyDiveHandler>();//get handle on SkyDive controller script
+            playerCharacter = GetComponent<BRS_TPCharacter>();//get a reference to the character to get at its model
+            playerController = GetComponent<BRS_TPController>();
+            playerTransform = this.transform;
+            originalParent = this.transform.parent;//player will be parented to plane, and then re-parented back here
+            myRigidbody = GetComponent<Rigidbody>();
+            zoneDamager = playerCharacter.GetComponent<BRS_ZoneDamage>(); // get player health
 
-            this.skyDiveController.enabled = false;//disable it, as we are not yet skydiving
+            this.enabled = true;//make sure it is turned on
+            zoneDamager.enabled = false; // can't take any damage while in the plane
+            skyDiveController.enabled = false;//disable it, as we are not yet skydiving
 
             //handle player init
             playerCharacter.ShowPlayerModel(false);//make player invisible
