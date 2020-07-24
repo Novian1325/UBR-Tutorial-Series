@@ -19,6 +19,12 @@ namespace PolygonPilgrimage.BattleRoyaleKit.Networking
 
             //set networking callbacks
             state.AddCallback("Scale", MatchScale);
+
+            //if(isOwner)
+            //if this is the master server, hook into start and end shrink events
+
+            //if this is not the master, configure create and destroy leading circle events
+            //disable zoneWallManager
         }
 
         public override void SimulateOwner()
