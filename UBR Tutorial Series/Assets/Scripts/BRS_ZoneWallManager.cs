@@ -1,6 +1,8 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using UnityEngine;
 using UnityEngine.Events;
+using Random = UnityEngine.Random; // clarify which random we are talking about because System contains a Random class as well
 
 //NOTE! Sizes and lengths are given in Unity Meters unless otherwise noted.
 
@@ -41,7 +43,16 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private ShrinkPhase CurrentShrinkPhase
         { get => shrinkPhaseOptions.ShrinkPhases[shrinkPhaseIndex]; } // readonly
 
-        #region Private Variables
+        [Header("---Events---")]
+        [SerializeField]
+        private UnityEvent startShrinkEvent = new UnityEvent();
+
+        public static UnityEvent StartShrinkEvent { get => Instance.startShrinkEvent; } // readonly
+
+        [SerializeField]
+        private UnityEvent endShrinkEvent = new UnityEvent();
+
+        public static UnityEvent EndShrinkEvent { get => Instance.endShrinkEvent; } // readonly
 
         /// <summary>
         /// this can be set to PUBLIC in order to troubleshoot.  It will show a checkbox in the Inspector.
@@ -99,17 +110,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         private LineRenderer lineRenderer;
 
         /// <summary>
-        /// Cached Transform of the ZoneWall Object.
-        /// </summary>
-        public Transform ZoneWallXform { get => transform; }
-
-        public bool IsShrinking { get => shrinking; } // readonly
-
-        /// <summary>
         /// Capsule Collider attached to this GameObject. Used as a reference for Scale.
         /// </summary>
         private CapsuleCollider capsuleCollider;
-        #endregion
 
         /// <summary>
         /// See Debug statements about what's going on during runtime.
@@ -117,22 +120,29 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         [Tooltip("Would the developer like to see Debug statements about what's going on during runtime?")]
         [SerializeField] private bool DEBUG = false;
 
+        /// <summary>
+        /// Cached Transform of the ZoneWall Object.
+        /// </summary>
+        public Transform ZoneWallXform { get => transform; }
+
+        public bool IsShrinking { get => shrinking; } // readonly
+
         protected override void Awake()
         {
-            base.Awake();
-            
-            //display linerenderer in space local to center of zone wall, not world
-            lineRenderer.useWorldSpace = false;
+            base.Awake(); // do normal RichMonoBehaviour stuff
 
             //get original radius
             originalZoneWallRadius = (int)capsuleCollider.radius;
             currentZoneWallRadius = startingZoneWallRadius;
 
             //draw minimap zone cirlce
-            ConfigureWorldCircle(lineRenderer, originalZoneWallRadius, originalZoneWallRadius, lineRendererSegments, false);
+            lineRenderer.useWorldSpace = false;//display linerenderer in space local to center of zone wall, not world
+            ConfigureWorldCircle(lineRenderer, originalZoneWallRadius, 
+                originalZoneWallRadius, lineRendererSegments);
 
             //move projector with circle
-            safeZone_Circle_Projector.transform.position = new Vector3(0, capsuleCollider.height, 0);//make sure projector is at a good height
+            safeZone_Circle_Projector.transform.position =
+                new Vector3(0, capsuleCollider.height, 0);//make sure projector is at a good height
 
             InitSingleton();
         }
@@ -237,6 +247,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             else if (Time.time > nextShrinkTime)
             {
                 shrinking = true;
+                startShrinkEvent.Invoke();
                 if (DEBUG) Debug.Log("[ZoneWallManager] Shrinking....");
             }
 
@@ -326,8 +337,9 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             ConfigureNewCenterPoint();
 
             //show on minimap where zone will shrink to
-            leadingCircle = CreateLeadingCircle(centerPoint, targetShrunkenRadius, 
-                originalZoneWallRadius, lineRendererSegments);
+            leadingCircle = CreateLeadingCircleObject(centerPoint, targetShrunkenRadius,
+                originalZoneWallRadius, //original height works here because zone wall model resembles a sphere
+                lineRendererSegments);
         }
 
         /// <summary>
@@ -341,6 +353,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
                 Destroy(leadingCircle);
 
                 shrinking = false;
+                endShrinkEvent.Invoke();
                 if (DEBUG) Debug.Log("[ZoneWallManager] Finished shrinking.");
 
                 //is there more shrinking to do?
@@ -415,6 +428,31 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             return newCenterPoint;
         }
 
+        //public void CreateLeadingCircle()
+        //{
+
+        //    //show on minimap where zone will shrink to
+        //    leadingCircle = CreateLeadingCircle(centerPoint, targetShrunkenRadius,
+        //        originalZoneWallRadius, //original height works here because zone wall model resembles a sphere
+        //        lineRendererSegments);
+        //}
+
+        public void DestroyLeadingCircle()
+        {
+            if (leadingCircle)
+                Destroy(leadingCircle);
+        }
+
+        public void SetLeadingCircle(Vector3 circleCenterPoint,
+            float radius, int segments = 64)
+        {
+            if (leadingCircle)
+                Destroy(leadingCircle);
+
+            leadingCircle = CreateLeadingCircleObject(circleCenterPoint,
+                radius, originalZoneWallRadius, segments);
+        }
+
         /// <summary>
         /// Create and configure a Leading Circle from scratch. One could set up a prefab with this configuration as well.
         /// </summary>
@@ -423,7 +461,7 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <param name="drawHeight">How high in space the points should be drawn</param>
         /// <param name="segments">How many segments should the circle be drawn using? 64 seems good; don't go too crazy.</param>
         /// <returns></returns>
-        private static GameObject CreateLeadingCircle(Vector3 circleCenterPoint, 
+        private static GameObject CreateLeadingCircleObject(Vector3 circleCenterPoint, 
             float radius, float drawHeight, int segments = 64)
         {
             //new empty game object
@@ -438,23 +476,23 @@ namespace PolygonPilgrimage.BattleRoyaleKit
             //configure line renderer
             //create new
             var lr = leadingCircle.AddComponent<LineRenderer>() as LineRenderer;
+            //coordinates are given in World Space, not Local Space (relative to the world, not this object)
+            lr.useWorldSpace = false;
             //do not cast shadows
             lr.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             //do not receive shadows
             lr.receiveShadows = false;
             //do this because I said so... I had a reason once. what was it? The lesson here is: comment as you go
             lr.allowOcclusionWhenDynamic = false;
-            //coordinates are given in World Space, not Local Space (relative to the world, not this object)
-            lr.useWorldSpace = false;
             //make first and last point connect to form a loop
             lr.loop = true;
 
             //create a new array
-            ConfigureWorldCircle(lr, radius, drawHeight, segments, false);
+            ConfigureWorldCircle(lr, radius, drawHeight, segments);
 
             return leadingCircle;
         }
-
+        
         /// <summary>
         /// Configure given line renderer's points to make a circle in space.
         /// </summary>
@@ -463,23 +501,21 @@ namespace PolygonPilgrimage.BattleRoyaleKit
         /// <param name="height">height of the circle</param>
         /// <param name="segments">how many segments should the circle be divided into?</param>
         /// <param name="renderInWorldSpace">Use local or world space?</param>
-        static void ConfigureWorldCircle(LineRenderer renderer, float radius, float height, int segments = 64, bool renderInWorldSpace = false)
+        private static void ConfigureWorldCircle(LineRenderer renderer, 
+            float radius, float height, int segments = 64)
         {
-            var x = 0.0f;//x coordinate of terminal point on unit circle
-            var y = height;//height circle is drawn
-            var z = 0.0f;//y coordinate of terminal point on unit circle
             var arcLength = 0.0f;//used for trig to determine terminal point on unit circle
             var spaceBetweenPoints = 360f / segments;//if a circle has x points, this is the distance between each of those points
 
             renderer.positionCount = segments;//positions are vertices of circle
 
             //place each point an equal distance apart on the unit circle, scaled by radius
-            for (var i = 0; i < segments; i++)
+            for (var i = 0; i < segments; ++i)
             {
-                x = Mathf.Sin(Mathf.Deg2Rad * arcLength) * radius;
-                z = Mathf.Cos(Mathf.Deg2Rad * arcLength) * radius;
+                var x = Mathf.Sin(Mathf.Deg2Rad * arcLength) * radius;
+                var z = Mathf.Cos(Mathf.Deg2Rad * arcLength) * radius;
 
-                renderer.SetPosition(i, new Vector3(x, y, z));
+                renderer.SetPosition(i, new Vector3(x, height, z));
 
                 arcLength += spaceBetweenPoints;
             }
